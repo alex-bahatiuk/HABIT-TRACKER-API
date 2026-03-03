@@ -48,3 +48,18 @@ def check_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
     db.commit()
     db.refresh(check)
     return check
+
+def uncheck_habit(db: Session, habit_id: int, day: date) -> None:
+    _ = get_habit(db, habit_id)
+
+    existing = db.scalar(
+        select(HabitCheck).where(
+            HabitCheck.habit_id == habit_id,
+            HabitCheck.day == day
+        )
+    )
+    if not existing:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Check not found for this day")
+
+    db.delete(existing)
+    db.commit()
