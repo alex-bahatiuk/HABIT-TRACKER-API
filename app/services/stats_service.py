@@ -3,11 +3,13 @@ from sqlalchemy import select
 from datetime import date, timedelta
 
 from app.models.check import HabitCheck
+from app.services.habits_service import get_habit
 
-def get_stats(db: Session, habit_id: int) -> dict:
-    # берём последние 30 дней отметок
+def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
+    _ = get_habit(db, habit_id)
+
     today = date.today()
-    start = today - timedelta(days=29)
+    start = today - timedelta(days=days - 1 )
 
     checks = list(
         db.scalars(
@@ -28,7 +30,8 @@ def get_stats(db: Session, habit_id: int) -> dict:
     return {
         "habit_id": habit_id,
         "streak": streak,
-        "checked_last_30_days": len(checked_days),
+        "days-window": days,
+        "checked_last_days": len(checked_days),
         "range_start": start.isoformat(),
         "range_end": today.isoformat(),
     }
