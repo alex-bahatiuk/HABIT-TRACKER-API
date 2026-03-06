@@ -6,12 +6,15 @@ from datetime import date
 from app.models.habit import Habit
 from app.models.check import HabitCheck
 
-def create_habit(db: Session, name: str) -> Habit:
+def create_habit(db: Session, name: str, target_per_week: int | None = None) -> Habit:
     existing = db.scalar(select(Habit).where(Habit.name == name))
     if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Habit with this name already exists")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Habit with this name already exists"
+        )
 
-    habit = Habit(name=name)
+    habit = Habit(name=name, target_per_week=target_per_week)
     db.add(habit)
     db.commit()
     db.refresh(habit)
