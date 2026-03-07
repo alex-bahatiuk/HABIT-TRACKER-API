@@ -11,7 +11,7 @@ router = APIRouter(prefix="/habits", tags=["habits"])
 
 @router.post("", response_model=HabitOut, status_code=status.HTTP_201_CREATED)
 def create(payload: HabitCreate, db: Session = Depends(db_session)):
-    return habits_service.create_habit(db, payload.name)
+    return habits_service.create_habit(db, payload.name,payload.target_per_week)
 
 @router.get("", response_model=list[HabitOut])
 def list_all(db: Session = Depends(db_session)):
