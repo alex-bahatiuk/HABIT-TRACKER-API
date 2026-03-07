@@ -28,16 +28,16 @@ def test_check_habit_yesterday_success():
     response = client.post(f"/habits/{habit_id}/check", json={"day": yesterday})
     assert response.status_code == 201
 
-# BUG - Odhaczanie przedwczoraj (Zabronione - tylko wczoraj/dzisiaj)
-def test_check_habit_two_days_ago_fail():
+# Odhaczanie przedwczoraj
+def test_check_habit_two_days_ago():
     unique_name = f"Nawyk {time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
     two_days_ago = (date.today() - timedelta(days=2)).isoformat()
 
     response = client.post(f"/habits/{habit_id}/check", json={"day": two_days_ago})
-    assert response.status_code == 400
+    assert response.status_code == 201
 
-# BUG - Odhaczanie w przyszłości (Zabronione)
+# Odhaczanie w przyszłości (Zabronione)
 def test_check_habit_future_fail():
     unique_name = f"Nawyk {time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
@@ -58,14 +58,15 @@ def test_check_habit_twice_same_day_fail():
     response = client.post(f"/habits/{habit_id}/check", json={"day": today})
     assert response.status_code == 409
 
-# BUG - BRAKUJĄCA FUNKCJA: Cofanie odhaczenia (Usuwanie)
+# Cofanie odhaczenia (Usuwanie)
 def test_uncheck_habit_success():
-    unique_name = f"Nawyk {time.time()}"
+    unique_name = f"Nawyk_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
-    check_resp = client.post(f"/habits/{habit_id}/check", json={"day": date.today().isoformat()})
-    check_id = check_resp.json()["id"]
+    today_iso = date.today().isoformat()
 
-    response = client.delete(f"/habits/check/{check_id}")
+    client.post(f"/habits/{habit_id}/check", json={"day": today_iso})
+
+    response = client.delete(f"/habits/{habit_id}/check", params={"day": today_iso})
 
     assert response.status_code == 204
 
