@@ -22,7 +22,12 @@ def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
 
     # streak: считаем подряд от today назад
     streak = 0
-    cur = today
+
+    if today in checked_days:
+       cur = today
+    else:
+       cur = today - timedelta(days=1)
+    
     while cur in checked_days:
         streak += 1
         cur -= timedelta(days=1)

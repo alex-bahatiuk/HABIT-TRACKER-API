@@ -10,7 +10,7 @@ router = APIRouter(prefix="/habits", tags=["stats"])
 @router.get("/{habit_id}/stats")
 def stats(
     habit_id: int,
-    days: int = Query(30, ge=1, le=365),
+    days: int = Query(30, ge=1),
     db: Session = Depends(db_session),
 ):
     get_habit(db, habit_id)  # чтобы 404 если привычки нет
