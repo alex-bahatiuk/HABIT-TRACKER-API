@@ -28,14 +28,21 @@ def test_check_habit_yesterday_success():
     response = client.post(f"/habits/{habit_id}/check", json={"day": yesterday})
     assert response.status_code == 201
 
-# Odhaczanie przedwczoraj
-def test_check_habit_two_days_ago():
+# Odhaczanie przedwczoraj (zabronione)
+def test_cannot_check_habit_two_days_ago():
     unique_name = f"Nawyk {time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+
+    # Data sprzed 2 dni
     two_days_ago = (date.today() - timedelta(days=2)).isoformat()
 
-    response = client.post(f"/habits/{habit_id}/check", json={"day": two_days_ago})
-    assert response.status_code == 201
+    response = client.post(
+        f"/habits/{habit_id}/check",
+        json={"day": two_days_ago}
+    )
+
+    assert response.status_code == 400
+    assert "Cannot check habit more than 1 day ago" in response.text
 
 # Odhaczanie w przyszłości (Zabronione)
 def test_check_habit_future_fail():

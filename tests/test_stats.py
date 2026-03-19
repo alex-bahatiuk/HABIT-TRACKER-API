@@ -5,6 +5,7 @@ from app.main import app
 
 client = TestClient(app)
 
+
 def test_stats_increment_after_single_checkin():
     unique_name = f"StatTest_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
@@ -17,6 +18,7 @@ def test_stats_increment_after_single_checkin():
     stats_data = response.json()
     assert stats_data["streak"] == 1
     assert stats_data["checked_last_days"] == 1
+
 
 def test_stats_30_days():
     unique_name = f"30days_{time.time()}"
@@ -31,6 +33,7 @@ def test_stats_30_days():
 
     assert stats["checked_last_days"] == 30
 
+
 def test_stats_total_count_limit_check():
     unique_name = f"LimitTest_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
@@ -44,6 +47,7 @@ def test_stats_total_count_limit_check():
 
     actual_checks = stats.get("checked_last_days", 0)
     assert actual_checks == 100
+
 
 #  Weryfikacja, czy przerwa w dniach poprawnie przerywa streak.
 def test_stats_streak_calculation_with_gap():
@@ -76,9 +80,6 @@ def test_stats_should_allow_more_than_365_days():
     assert response.status_code == 200
 
 
-""" SUGESTIA UX: Weryfikacja, czy streak jest utrzymywany, jeśli dzisiejszy dzień 
-nie został jeszcze odhaczony (szansa dla użytkownika). """
-
 def test_stats_streak_grace_period_ux():
     unique_name = f"UX_Test_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
@@ -91,25 +92,52 @@ def test_stats_streak_grace_period_ux():
     stats = response.json()
 
     # Oczekiwanie: Streak wynosi 1 (utrzymanie passy z wczoraj do końca bieżącego dnia)
-    assert stats["streak"] == 1, "System zbyt surowo zeruje streak przed końcem dnia"
+    assert stats["streak"] == 1
 
-""" SUGESTIA UX: Weryfikacja, czy streak jest utrzymywany przy targecie/tyd < 7. """
 
-# Streak przy celu 3/tydzień (oczekujemy utrzymania streaka, dostaniemy 0)
-def test_stats_streak_should_persist_with_target():
-    unique_name = f"TargetLogic_{time.time()}"
-    # Tworzymy nawyk z celem 3 razy w tygodniu
+# Streak przy celu 3/tydzień (oczekujemy utrzymania streaka)
+def test_weekly_streak_with_gap_but_target_met():
+    # 1. Tworzymy nawyk z celem 3 dni w tygodniu
+    response = client.post("/habits/", json={"name": "Weekly Gap Test", "target_per_week": 3})
+    habit_id = response.json()["id"]
+
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    tuesday = monday + timedelta(days=1)
+    # Środa (monday + 2) zostaje pusta
+    thursday = monday + timedelta(days=3)  # Zakładamy, że dziś jest co najmniej czwartek lub później
+
+    # 2. Odhaczamy poniedziałek, wtorek i czwartek
+    client.post(f"/habits/{habit_id}/check", params={"day": monday.isoformat()})
+    client.post(f"/habits/{habit_id}/check", params={"day": tuesday.isoformat()})
+    client.post(f"/habits/{habit_id}/check", params={"day": thursday.isoformat()})
+
+    # 3. Sprawdzamy statystyki
+    stats = client.get(f"/habits/{habit_id}/stats").json()
+
+    # Według poprawnej logiki tygodniowej streak powinien być 3.
+    assert stats["streak"] == 3
+
+# Streak z kilku tygodni przy celu 3/tydzień (oczekujemy utrzymania streaka)
+def test_stats_streak_should_ignore_gaps_within_target_logic():
+    unique_name = f"TargetLogic_Trap_{time.time()}"
+    # Tworzymy nawyk: cel 3 razy w tygodniu
     habit_id = client.post("/habits",
                            json={"name": unique_name, "target_per_week": 3}).json()["id"]
 
-    # Użytkownik odhaczył wczoraj i przedwczoraj (realizuje plan 3/tydzień)
-    yesterday = (date.today() - timedelta(days=1)).isoformat()
+    # 1. Kliknięcia z POPRZEDNIEGO tygodnia (np. 10, 11, 12 dni temu)
+    for i in range(10, 13):
+        past_day = (date.today() - timedelta(days=i)).isoformat()
+        client.post(f"/habits/{habit_id}/check", json={"day": past_day})
+
+    # 2. Kliknięcia z BIEŻĄCEGO tygodnia (dzisiaj i 2 dni temu)
+    today = date.today().isoformat()
     two_days_ago = (date.today() - timedelta(days=2)).isoformat()
-    client.post(f"/habits/{habit_id}/check", json={"day": yesterday})
+    client.post(f"/habits/{habit_id}/check", json={"day": today})
     client.post(f"/habits/{habit_id}/check", json={"day": two_days_ago})
 
     response = client.get(f"/habits/{habit_id}/stats")
     stats = response.json()
 
-    # My oczekujemy, że streak wynosi co najmniej 2 (bo wczoraj i przedwczoraj było OK).
-    assert stats["streak"] >= 2
+    # Twardy warunek: 3 dni z zeszłego tygodnia + 2 dni z tego = 5 dni streaka
+    assert stats["streak"] == 5, f"Oczekiwano 5 dni streaka, a system pokazał {stats['streak']}. Kod nie łączy tygodni!"
