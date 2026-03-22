@@ -98,7 +98,11 @@ def test_stats_streak_grace_period_ux():
 # Streak przy celu 3/tydzień (oczekujemy utrzymania streaka)
 def test_weekly_streak_with_gap_but_target_met():
     # 1. Tworzymy nawyk z celem 3 dni w tygodniu
-    response = client.post("/habits/", json={"name": "Weekly Gap Test", "target_per_week": 3})
+    name = f"WeeklyGap_{time.time()}"
+    response = client.post("/habits/", json={"name": name, "target_per_week": 3})
+    #print(response.status_code)
+    #print(response.json())
+
     habit_id = response.json()["id"]
 
     today = date.today()

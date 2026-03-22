@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from fastapi import HTTPException, status
-from datetime import date
+from datetime import date, timedelta
 
 from app.models.habit import Habit
 from app.models.check import HabitCheck
@@ -36,16 +36,22 @@ def delete_habit(db: Session, habit_id: int) -> None:
 
 def check_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
     _ = get_habit(db, habit_id)
+    today = date.today()
     # !zapret budushih dat
-    if day > date.today():
+    if day > today:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot check habit for future day")
-    # если уже отмечено — не ломаем статистику
+    
+    # !zapret otmechat proshluyu datu
+    #if day < today - timedelta(days=1):
+    #    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot check habit more than 1 day ago")
+    
+    # !zapret otmechat odin i tot je den neskolko raz
     existing = db.scalar(
         select(HabitCheck).where(HabitCheck.habit_id == habit_id, HabitCheck.day == day)
     )
     if existing:
         raise HTTPException(status_code=409, detail="This day is already checked")
-
+    
     check = HabitCheck(habit_id=habit_id, day=day)
     db.add(check)
     db.commit()

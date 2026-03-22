@@ -54,24 +54,33 @@ def calculate_daily_streak(checks):
 def calculate_weekly_streak(checks, target_per_week):
 
     weeks = { }
+
     for check in checks:
-        week_start = check.day - timedelta(days=check.day.weekday())  # начало недели (понедельник)
-        weeks[week_start] = weeks.get(week_start, 0) + 1
+            week_start = check.day - timedelta(days=check.day.weekday())  # начало недели (понедельник)
+            weeks[week_start] = weeks.get(week_start, 0) + 1
         
-        today = date.today()
-        current_week_start = today - timedelta(days=today.weekday())
-        current_count = weeks.get(current_week_start, 0)
-        checked_days = {c.day for c in checks}
-        prev_day = today - timedelta(days=1)
+    today = date.today()
+    current_week_start = today - timedelta(days=today.weekday())
+    current_count = weeks.get(current_week_start, 0)
+    streak = current_count
 
-        streak = current_count
-
-    while prev_day in checked_days:
-            streak += 1
-            prev_day = prev_day - timedelta(days=1)
-
+    sorted_weeks = sorted(weeks.keys(), reverse=True)
+    for week in sorted_weeks:
+        if week == current_week_start:
+                continue  # пропускаем текущую неделю, она уже учтена в current_count
+        count = weeks[week]
+        if count >= target_per_week:
+                streak += count
+        else:
+                break
     return streak
-    
+
+
+
+
+
+
+        
     
 
     
