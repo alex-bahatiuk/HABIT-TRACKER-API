@@ -1,14 +1,13 @@
-import time
 from datetime import date, timedelta
 from fastapi.testclient import TestClient
 from app.main import app
+
 client = TestClient(app)
 
 # Odhaczanie dzisiaj (happy path)
 def test_check_habit_today_success():
-    # Dodajemy timestamp do nazwy, żeby nazwa była unikalna i test nie traktował ich jako duplikaty
-    unique_name = f"Nawyk {time.time()}"
-    habit_resp = client.post("/habits", json={"name": unique_name})
+    name = "Nawyk Dzisiaj"
+    habit_resp = client.post("/habits", json={"name": name})
 
     assert habit_resp.status_code == 201
     habit_id = habit_resp.json()["id"]
@@ -20,8 +19,8 @@ def test_check_habit_today_success():
 
 # Odhaczanie wczoraj (Dozwolone)
 def test_check_habit_yesterday_success():
-    unique_name = f"Nawyk {time.time()}"
-    habit_resp = client.post("/habits", json={"name": unique_name})
+    name = "Nawyk Wczoraj"
+    habit_resp = client.post("/habits", json={"name": name})
     habit_id = habit_resp.json()["id"]
     yesterday = (date.today() - timedelta(days=1)).isoformat()
 
@@ -30,8 +29,8 @@ def test_check_habit_yesterday_success():
 
 # Odhaczanie przedwczoraj (zabronione)
 def test_cannot_check_habit_two_days_ago():
-    unique_name = f"Nawyk {time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    name = "Nawyk Przedwczoraj"
+    habit_id = client.post("/habits", json={"name": name}).json()["id"]
 
     # Data sprzed 2 dni
     two_days_ago = (date.today() - timedelta(days=2)).isoformat()
@@ -46,8 +45,8 @@ def test_cannot_check_habit_two_days_ago():
 
 # Odhaczanie w przyszłości (Zabronione)
 def test_check_habit_future_fail():
-    unique_name = f"Nawyk {time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    name = "Nawyk Przyszłość"
+    habit_id = client.post("/habits", json={"name": name}).json()["id"]
     tomorrow = (date.today() + timedelta(days=1)).isoformat()
 
     response = client.post(f"/habits/{habit_id}/check", json={"day": tomorrow})
@@ -55,8 +54,8 @@ def test_check_habit_future_fail():
 
 # Podwójne odhaczenie tego samego dnia (Zabronione)
 def test_check_habit_twice_same_day_fail():
-    unique_name = f"Nawyk {time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    name = "Nawyk Podwójny"
+    habit_id = client.post("/habits", json={"name": name}).json()["id"]
     today = date.today().isoformat()
 
     # Pierwszy raz - OK
@@ -67,8 +66,8 @@ def test_check_habit_twice_same_day_fail():
 
 # Cofanie odhaczenia (Usuwanie)
 def test_uncheck_habit_success():
-    unique_name = f"Nawyk_{time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    name = "Nawyk Usuwanie"
+    habit_id = client.post("/habits", json={"name": name}).json()["id"]
     today_iso = date.today().isoformat()
 
     client.post(f"/habits/{habit_id}/check", json={"day": today_iso})
@@ -79,8 +78,8 @@ def test_uncheck_habit_success():
 
 # sprawdzamy czy można odhaczyć 2 różne nawyki w ten sam dzień (powinno się dać)
 def test_check_different_habits_same_day():
-    h1 = client.post("/habits", json={"name": f"H1_{time.time()}"}).json()["id"]
-    h2 = client.post("/habits", json={"name": f"H2_{time.time()}"}).json()["id"]
+    h1 = client.post("/habits", json={"name": "H1"}).json()["id"]
+    h2 = client.post("/habits", json={"name": "H2"}).json()["id"]
 
     today = date.today().isoformat()
 

@@ -1,4 +1,3 @@
-import time
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -7,8 +6,8 @@ client = TestClient(app)
 # Weryfikacja pełnego cyklu życia: Tworzenie -> Odhaczanie -> Usuwanie -> Brak śladów
 def test_delete_habit_with_cascade_cleanup():
     # 1. Tworzymy nawyk
-    unique_name = f"FullCycleTest_{time.time()}"
-    habit_resp = client.post("/habits", json={"name": unique_name})
+    name = "Full Cycle Test"
+    habit_resp = client.post("/habits", json={"name": name})
     habit_id = habit_resp.json()["id"]
 
     # 2. Odhaczamy go (żeby sprawdzić kaskadowe usuwanie checków)
