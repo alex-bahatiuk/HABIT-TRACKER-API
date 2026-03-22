@@ -42,8 +42,8 @@ def check_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot check habit for future day")
     
     # !zapret otmechat proshluyu datu
-    #if day < today - timedelta(days=1):
-    #    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot check habit more than 1 day ago")
+    if day < today - timedelta(days=1):
+       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot check habit more than 1 day ago")
     
     # !zapret otmechat odin i tot je den neskolko raz
     existing = db.scalar(
