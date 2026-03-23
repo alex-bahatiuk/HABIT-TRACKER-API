@@ -1,3 +1,4 @@
+from freezegun import freeze_time
 import sys
 import os
 from datetime import date, timedelta
@@ -10,6 +11,7 @@ from app.core.database import SessionLocal
 from app.models.check import HabitCheck
 
 client = TestClient(app)
+
 
 def seed_checkins(habit_id, dates):
     db = SessionLocal()
@@ -27,7 +29,8 @@ def seed_checkins(habit_id, dates):
 
 
 def test_stats_increment_after_single_checkin():
-    name = "StatTest"
+    with freeze_time("2026-03-23"):
+        name = "StatTest"
     habit_id = client.post("/habits", json={"name": name}).json()["id"]
 
     client.post(f"/habits/{habit_id}/check", json={"day": date.today().isoformat()})
@@ -41,7 +44,8 @@ def test_stats_increment_after_single_checkin():
 
 
 def test_stats_30_days():
-    name = "30days"
+    with freeze_time("2026-03-23"):
+        name = "30days"
     # Tworzymy nawyk przez API
     habit_id = client.post("/habits", json={"name": name}).json()["id"]
 
@@ -57,7 +61,8 @@ def test_stats_30_days():
 
 
 def test_stats_total_count_limit_check():
-    name = "LimitTest"
+    with freeze_time("2026-03-23"):
+        name = "LimitTest"
     habit_id = client.post("/habits", json={"name": name}).json()["id"]
 
     # Generujemy listę 100 dat (od dziś do 99 dni wstecz)
@@ -75,7 +80,8 @@ def test_stats_total_count_limit_check():
 
 # Weryfikacja, czy przerwa w dniach poprawnie przerywa streak.
 def test_stats_streak_calculation_with_gap():
-    name = "GapTest"
+    with freeze_time("2026-03-23"):
+        name = "GapTest"
     habit_id = client.post("/habits", json={"name": name}).json()["id"]
 
     # Grupa 1: Ciąg 3 dni (dzisiaj, wczoraj, przedwczoraj) -> Streak powinien być 3
@@ -95,7 +101,8 @@ def test_stats_streak_calculation_with_gap():
 
 
 def test_stats_should_allow_more_than_365_days():
-    name = "LongTerm"
+    with freeze_time("2026-03-23"):
+        name = "LongTerm"
     habit_id = client.post("/habits", json={"name": name}).json()["id"]
 
     # 1. Wstrzykujemy 400 dni
@@ -112,7 +119,8 @@ def test_stats_should_allow_more_than_365_days():
 
 
 def test_stats_streak_grace_period_ux():
-    name = "UX_Test"
+    with freeze_time("2026-03-23"):
+        name = "UX_Test"
     habit_id = client.post("/habits", json={"name": name}).json()["id"]
 
     # Odhaczamy tylko wczoraj
@@ -128,8 +136,8 @@ def test_stats_streak_grace_period_ux():
 
 # Streak przy celu 3/tydzień (oczekujemy utrzymania streaka)
 def test_weekly_streak_with_gap_but_target_met():
-
-    name = "WeeklyGap"
+    with freeze_time("2026-03-23"):
+        name = "WeeklyGap"
     # Tworzymy nawyk z celem 3 dni w tygodniu przez API
     response = client.post("/habits", json={"name": name, "target_per_week": 3})
 
@@ -150,7 +158,8 @@ def test_weekly_streak_with_gap_but_target_met():
 
 # Streak z kilku tygodni przy celu 3/tydzień (oczekujemy utrzymania streaka)
 def test_stats_streak_should_ignore_gaps_within_target_logic():
-    name = "TargetLogic_Trap"
+    with freeze_time("2026-03-23"):
+        name = "TargetLogic_Trap"
     # Tworzymy nawyk: cel 3 razy w tygodniu przez API
     habit_id = client.post("/habits", json={"name": name, "target_per_week": 3}).json()["id"]
 

@@ -1,12 +1,15 @@
+from freezegun import freeze_time
 from fastapi.testclient import TestClient
 from app.main import app
 from datetime import date
 
 client = TestClient(app)
 
+
 def test_create_habit_and_check_twice_same_day_should_fail():
     # Tworzymy nawyk
-    r = client.post("/habits", json={"name": "Drink water"})
+    with freeze_time("2026-03-23"):
+        r = client.post("/habits", json={"name": "Drink water"})
     assert r.status_code == 201
     habit_id = r.json()["id"]
 
