@@ -21,10 +21,13 @@ def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
     )
     checked_days = {c.day for c in checks}
     if habit.target_per_week is not None:
+        print("Calculating weekly streak...")
         streak = calculate_weekly_streak(checks, habit.target_per_week)
     else:
+        print("Calculating daily streak...")
         streak = calculate_daily_streak(checks)
-   
+    print("target per week=", habit.target_per_week)
+    print("checks=", [c.day for c in checks])
     return {
         "habit_id": habit_id,
         "streak": streak,
@@ -61,12 +64,14 @@ def calculate_weekly_streak(checks, target_per_week):
         
     today = date.today()
     current_week_start = today - timedelta(days=today.weekday())
-    current_count = weeks.get(current_week_start, 0)
-    streak = current_count
+    #current_count = weeks.get(current_week_start, 0)
+    streak = 0
 
     sorted_weeks = sorted(weeks.keys(), reverse=True)
+    print("Weeks:", sorted_weeks)
     for week in sorted_weeks:
         if week == current_week_start:
+                streak += weeks[week]  # учитываем текущую неделю, даже если она не полная
                 continue  # пропускаем текущую неделю, она уже учтена в current_count
         count = weeks[week]
         if count >= target_per_week:
