@@ -148,11 +148,12 @@ def test_weekly_streak_with_gap_but_target_met():
     today = date.today()
     friday = today - timedelta(days=3)
     thursday = today - timedelta(days=4)
+    wednesday = today - timedelta(days=5)
 
-    seed_checkins(habit_id, [today, friday, thursday])
+    seed_checkins(habit_id, [today, friday, thursday, wednesday])
 
     stats = client.get(f"/habits/{habit_id}/stats").json()
-    assert stats["streak"] >= 3
+    assert stats["streak"] >= 4
 
 
 # Streak z kilku tygodni przy celu 3/tydzień (oczekujemy utrzymania streaka)
