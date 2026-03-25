@@ -146,11 +146,10 @@ def test_weekly_streak_with_gap_but_target_met():
     habit_id = response.json()["id"]
 
     today = date.today()
-    monday = today - timedelta(days=today.weekday())
-    tuesday = monday + timedelta(days=1)
-    thursday = monday + timedelta(days=3)
+    friday = today - timedelta(days=3)
+    thursday = today - timedelta(days=4)
 
-    seed_checkins(habit_id, [monday, tuesday, thursday])
+    seed_checkins(habit_id, [today, friday, thursday])
 
     stats = client.get(f"/habits/{habit_id}/stats").json()
     assert stats["streak"] >= 3
