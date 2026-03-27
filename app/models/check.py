@@ -2,9 +2,12 @@ from datetime import date, datetime
 
 from sqlalchemy import Date, DateTime, ForeignKey, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from app.core.database import Base
-
+from enum import Enum
+from sqlalchemy import Enum as SqlEnum
+class HabitStatus(str, Enum):
+    DONE = "done"
+    SKIPPED = "skipped"
 
 class HabitCheck(Base):
     __tablename__ = "habit_checks"
@@ -34,3 +37,5 @@ class HabitCheck(Base):
     __table_args__ = (
         UniqueConstraint("habit_id", "day", name="uq_habit_day"),
     )
+   
+    status:Mapped[HabitStatus] = mapped_column(SqlEnum(HabitStatus), nullable=False, default=HabitStatus.DONE)

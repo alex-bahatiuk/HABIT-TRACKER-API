@@ -15,3 +15,4 @@ def stats(
 ):
     get_habit(db, habit_id)  # чтобы 404 если привычки нет
     return get_stats(db, habit_id, days=days)
+

@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from datetime import date, timedelta
 
 from app.models.habit import Habit
-from app.models.check import HabitCheck
+from app.models.check import HabitCheck, HabitStatus
 
 def create_habit(db: Session, name: str, target_per_week: int | None = None) -> Habit:
     existing = db.scalar(select(Habit).where(Habit.name == name))
@@ -45,18 +45,16 @@ def check_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
     if day < today - timedelta(days=1):
        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot check habit more than 1 day ago")
     
-    # !zapret otmechat odin i tot je den neskolko raz
     existing = db.scalar(
         select(HabitCheck).where(HabitCheck.habit_id == habit_id, HabitCheck.day == day)
     )
-    if existing:
-        raise HTTPException(status_code=409, detail="This day is already checked")
-    
-    check = HabitCheck(habit_id=habit_id, day=day)
-    db.add(check)
+    if existing: raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This day is already checked")
+    else:
+        existing = HabitCheck(habit_id=habit_id, day=day, status=HabitStatus.DONE,)
+        db.add(existing)
     db.commit()
-    db.refresh(check)
-    return check
+    db.refresh(existing)
+    return existing
 
 def uncheck_habit(db: Session, habit_id: int, day: date) -> None:
     _ = get_habit(db, habit_id)
@@ -72,3 +70,23 @@ def uncheck_habit(db: Session, habit_id: int, day: date) -> None:
 
     db.delete(existing)
     db.commit()
+
+def skip_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
+    habit = get_habit(db, habit_id)
+    
+    check = db.scalar(
+        select(HabitCheck).where(
+            HabitCheck.habit_id == habit_id,
+            HabitCheck.day == day
+        )
+    )
+    
+    if check is None:
+        check = HabitCheck(habit_id=habit_id, day=day, status=HabitStatus.SKIPPED)
+        db.add(check)
+    else:
+        check.status = HabitStatus.SKIPPED
+
+    db.commit()
+    db.refresh(check)
+    return check

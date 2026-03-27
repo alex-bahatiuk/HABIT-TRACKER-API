@@ -155,7 +155,7 @@ def test_stats_streak_should_ignore_gaps_within_target_logic():
     habit_id = client.post("/habits", json={"name": name, "target_per_week": 3}).json()["id"]
 
     # 1. Daty z POPRZEDNIEGO tygodnia (np. 10, 11, 12 dni temu)
-    past_week = [date.today() - timedelta(days=i) for i in range(10, 13)]
+    past_week = [date(2026, 3, 16), date(2026, 3, 17), date(2026, 3, 18)]
 
     # 2. Daty z BIEŻĄCEGO tygodnia (dzisiaj i 2 dni temu)
     current_week = [date.today(), date.today() - timedelta(days=2)]

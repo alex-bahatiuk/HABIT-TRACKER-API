@@ -38,3 +38,7 @@ def uncheck(
 ):
     habits_service.uncheck_habit(db, habit_id, day)
     return None
+
+@router.post("/{habit_id}/skip",response_model=CheckOut, status_code=status.HTTP_201_CREATED)
+def skip_habit_endpoint(habit_id: int, payload: CheckCreate, db: Session = Depends(db_session)):
+    return habits_service.skip_habit(db, habit_id, payload.day)
