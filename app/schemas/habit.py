@@ -11,3 +11,10 @@ class HabitOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class HabitStrengthOut(BaseModel):
+    habit_id: int
+    strength: float
+
+    class Config:
+        from_attributes = True

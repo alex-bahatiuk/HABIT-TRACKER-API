@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date
 from fastapi import Query
 from app.api.deps import db_session
-from app.schemas.habit import HabitCreate, HabitOut
+from app.schemas.habit import HabitCreate, HabitOut, HabitStrengthOut
 from app.schemas.check import CheckCreate, CheckOut
 from app.services import habits_service
 
@@ -37,4 +37,14 @@ def uncheck(
     db: Session = Depends(db_session),
 ):
     habits_service.uncheck_habit(db, habit_id, day)
+
     return None
+
+@router.post("/{habit_id}/skip",response_model=CheckOut, status_code=status.HTTP_201_CREATED)
+def skip_habit_endpoint(habit_id: int, payload: CheckCreate, db: Session = Depends(db_session)):
+    return habits_service.skip_habit(db, habit_id, payload.day)
+
+@router.get("/{habit_id}/strength", response_model=HabitStrengthOut)
+def get_habit_strength(habit_id: int, db: Session = Depends(db_session)):
+    strength = habits_service.calculate_habit_strength(db, habit_id)
+    return HabitStrengthOut(habit_id=habit_id, strength=strength)
