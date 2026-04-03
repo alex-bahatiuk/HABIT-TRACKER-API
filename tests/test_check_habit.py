@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from fastapi.testclient import TestClient
 from app.main import app
+from tests.test_stats import seed_checkins
 
 client = TestClient(app)
 
