@@ -1,9 +1,25 @@
 import time
 from datetime import date, timedelta
+from app.core.database import SessionLocal
+from app.models.check import HabitCheck
 from fastapi.testclient import TestClient
 from app.main import app
 
 client = TestClient(app)
+
+def seed_checkins(habit_id, dates):
+    db = SessionLocal()
+    try:
+        for d in dates:
+            # Tworzymy rekordy bezpośrednio w bazie, omijając walidację API
+            check = HabitCheck(habit_id=habit_id, day=d)
+            db.add(check)
+        db.commit()
+    except Exception as e:
+        print(f"Błąd bazy: {e}")
+        db.rollback()
+    finally:
+        db.close()
 
 def test_stats_increment_after_single_checkin():
     unique_name = f"StatTest_{time.time()}"
