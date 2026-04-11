@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from datetime import date, timedelta
 
-from tests.test_stats import seed_checkins
+from tests.test_stats import seed_checkins, seed_skips
 
 client = TestClient(app)
 
@@ -117,7 +117,7 @@ def test_undo_skip_habit_from_two_days_ago():
     skip_date = (date.today() - timedelta(days=2))
     past_days = [skip_date]
 
-    seed_checkins(habit_id, past_days)
+    seed_skips(habit_id, past_days)
 
     response = client.delete(f"/habits/{habit_id}/check", params={"day": skip_date.isoformat()})
 

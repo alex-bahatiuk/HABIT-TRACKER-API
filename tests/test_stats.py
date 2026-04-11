@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from app.main import app
 from app.core.database import SessionLocal
-from app.models.check import HabitCheck
+from app.models.check import HabitCheck, HabitStatus
 
 client = TestClient(app)
 
@@ -17,6 +17,20 @@ def seed_checkins(habit_id, dates):
         for d in dates:
             # Tworzymy rekordy bezpośrednio w bazie, omijając walidację API
             check = HabitCheck(habit_id=habit_id, day=d)
+            db.add(check)
+        db.commit()
+    except Exception as e:
+        print(f"Błąd bazy: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+def seed_skips(habit_id, dates):
+    db = SessionLocal()
+    try:
+        for d in dates:
+            # Tworzymy rekordy bezpośrednio w bazie, omijając walidację API
+            check = HabitCheck(habit_id=habit_id, day=d, status=HabitStatus.SKIPPED)
             db.add(check)
         db.commit()
     except Exception as e:
