@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date
 from fastapi import Query
 from app.api.deps import db_session
-from app.schemas.habit import HabitCreate, HabitOut
+from app.schemas.habit import HabitCreate, HabitOut, HabitStrengthOut
 from app.schemas.check import CheckCreate, CheckOut
 from app.services import habits_service
 
@@ -20,6 +20,12 @@ def list_all(db: Session = Depends(db_session)):
 @router.get("/{habit_id}", response_model=HabitOut)
 def get_one(habit_id: int, db: Session = Depends(db_session)):
     return habits_service.get_habit(db, habit_id)
+
+@router.get("/{habit_id}/strength", response_model=HabitStrengthOut)
+def get_strength(habit_id: int, db: Session = Depends(db_session)):
+    habit = habits_service.get_habit(db, habit_id)
+    strength = habits_service.calculate_habit_strength(db, habit_id)
+    return HabitStrengthOut(habit_id=habit_id, strength=strength)
 
 @router.delete("/{habit_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(habit_id: int, db: Session = Depends(db_session)):

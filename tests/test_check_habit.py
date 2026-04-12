@@ -1,6 +1,8 @@
 from datetime import date, timedelta
 from fastapi.testclient import TestClient
 from app.main import app
+from app.core.database import SessionLocal
+from app.models.check import HabitCheck
 
 client = TestClient(app)
 
@@ -108,21 +110,47 @@ def test_uncheck_habit_success():
     assert response.status_code == 204
 
 # uncheck habit two days ago (not allowed)
+from datetime import date, timedelta
+from fastapi.testclient import TestClient
+
+from app.main import app
+from app.core.database import SessionLocal
+from app.models.check import HabitCheck
+
+client = TestClient(app)
+
+
+def seed_checkins(habit_id, dates):
+    db = SessionLocal()
+    try:
+        for d in dates:
+            check = HabitCheck(habit_id=habit_id, day=d)
+            db.add(check)
+        db.commit()
+    except Exception as e:
+        print(f"Błąd bazy: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+
 def test_uncheck_habit_two_days_ago():
     name = "Nawyk Usuwanie"
     habit_id = client.post("/habits", json={"name": name}).json()["id"]
 
-    past_days = [(date.today() - timedelta(days=i)) for i in range(3)]
-
+    past_days = [date.today() - timedelta(days=i) for i in range(3)]
     seed_checkins(habit_id, past_days)
 
     two_days_ago = (date.today() - timedelta(days=2)).isoformat()
 
-    response = client.delete(f"/habits/{habit_id}/check", params={"day": two_days_ago})
+    response = client.delete(
+        f"/habits/{habit_id}/check",
+        params={"day": two_days_ago}
+    )
 
     assert response.status_code == 400
     assert "Cannot uncheck habit more than 1 day ago" in response.text
-
+    
 # sprawdzamy czy można odhaczyć 2 różne nawyki w ten sam dzień (powinno się dać)
 def test_check_different_habits_same_day():
     h1 = client.post("/habits", json={"name": "H1"}).json()["id"]

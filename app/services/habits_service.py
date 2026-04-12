@@ -48,9 +48,13 @@ def check_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
     existing = db.scalar(
         select(HabitCheck).where(HabitCheck.habit_id == habit_id, HabitCheck.day == day)
     )
-    if existing: raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This day is already checked")
+    if existing: 
+        if existing.status == HabitStatus.DONE:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This day is already checked")
+        else:
+            existing.status = HabitStatus.DONE
     else:
-        existing = HabitCheck(habit_id=habit_id, day=day, status=HabitStatus.DONE,)
+        existing = HabitCheck(habit_id=habit_id, day=day, status=HabitStatus.DONE)
         db.add(existing)
     db.commit()
     db.refresh(existing)
@@ -59,32 +63,44 @@ def check_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
 def uncheck_habit(db: Session, habit_id: int, day: date) -> None:
     _ = get_habit(db, habit_id)
 
-    existing = db.scalar(
-        select(HabitCheck).where(
-            HabitCheck.habit_id == habit_id,
-            HabitCheck.day == day
-        )
-    )
+    existing = db.scalar(select(HabitCheck).where(HabitCheck.habit_id == habit_id,HabitCheck.day == day))
+
+    today = date.today()
+    
     if not existing:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Check not found for this day")
+
+    if day > today:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot uncheck habit for future day")
+    
+    if day < today - timedelta(days=1):
+
+        if existing.status == HabitStatus.SKIPPED:
+            raise HTTPException(status_code=400,detail="Cannot undo skip more than 1 day ago")
+        else:
+            raise HTTPException(status_code=400,detail="Cannot uncheck habit more than 1 day ago")
 
     db.delete(existing)
     db.commit()
 
-def skip_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
-    habit = get_habit(db, habit_id)
+def skip_habit(db: Session, habit_id: int, day: date) -> HabitCheck :
+    _ = get_habit(db, habit_id)
+
+    today = date.today()
     
-    check = db.scalar(
-        select(HabitCheck).where(
-            HabitCheck.habit_id == habit_id,
-            HabitCheck.day == day
-        )
-    )
+    if day > today:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot skip habit for future day")
+    if day < today - timedelta(days=1):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot skip habit more than 1 day ago")
+    
+    check = db.scalar(select(HabitCheck).where(HabitCheck.habit_id == habit_id,HabitCheck.day == day))
     
     if check is None:
         check = HabitCheck(habit_id=habit_id, day=day, status=HabitStatus.SKIPPED)
         db.add(check)
     else:
+        if check.status == HabitStatus.SKIPPED:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Habit already skipped for this day")  
         check.status = HabitStatus.SKIPPED
 
     db.commit()
