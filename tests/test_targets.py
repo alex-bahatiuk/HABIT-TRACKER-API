@@ -1,12 +1,13 @@
+import time
 from fastapi.testclient import TestClient
 from app.main import app
 
 client = TestClient(app)
 
 def test_create_habit_with_target_success():
-    name = "TargetHabit"
+    unique_name = f"TargetHabit_{time.time()}"
     payload = {
-        "name": name,
+        "name": unique_name,
         "target_per_week": 5
     }
     response = client.post("/habits", json=payload)
@@ -16,9 +17,9 @@ def test_create_habit_with_target_success():
     assert "target_per_week" in data
 
 def test_create_habit_invalid_weekly_target():
-    name = "InvalidTarget"
+    unique_name = f"InvalidTarget_{time.time()}"
     payload = {
-        "name": name,
+        "name": unique_name,
         "target_per_week": 8
     }
     response = client.post("/habits", json=payload)
@@ -27,9 +28,9 @@ def test_create_habit_invalid_weekly_target():
 
 # Test na target_per_week = 0 (powinien rzucić błąd walidacji 422)
 def test_create_habit_with_zero_target_fail():
-    name = "ZeroTarget"
+    unique_name = f"ZeroTarget_{time.time()}"
     payload = {
-        "name": name,
+        "name": unique_name,
         "target_per_week": 0
     }
     response = client.post("/habits", json=payload)
@@ -39,15 +40,15 @@ def test_create_habit_with_zero_target_fail():
 
 # Test na brak celu (tworzenie nawyku tylko z nazwą)
 def test_create_habit_without_target_success():
-    name = "NoTarget"
+    unique_name = f"NoTarget_{time.time()}"
     payload = {
-        "name": name
+        "name": unique_name
         # brak klucza target_per_week
     }
     response = client.post("/habits", json=payload)
     data = response.json()
 
     assert response.status_code == 201
-    assert data["name"] == name
+    assert data["name"] == unique_name
     # Sprawdzamy, czy system zapisał to jako None
     assert data["target_per_week"] is None

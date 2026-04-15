@@ -1,14 +1,15 @@
+import time
 from fastapi.testclient import TestClient
 from app.main import app
 client = TestClient(app)
 
 # 1. Happy Path - Poprawna nazwa
 def test_create_habit_success():
-    name = "Poprawny Nawyk"
-    payload = {"name": name}
+    unique_name = f"Nawyk {time.time()}"
+    payload = {"name": unique_name}
     response = client.post("/habits", json=payload)
     assert response.status_code == 201
-    assert response.json()["name"] == name
+    assert response.json()["name"] == unique_name
 
 # 2. Wartość brzegowa - Za krótka nazwa (pusty string)
 def test_create_habit_too_short():
