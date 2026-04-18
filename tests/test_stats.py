@@ -168,9 +168,19 @@ def test_stats_streak_should_ignore_gaps_within_target_logic():
     # Tworzymy nawyk: cel 3 razy w tygodniu przez API
     habit_id = client.post("/habits", json={"name": name, "target_per_week": 3}).json()["id"]
 
-    # 1. Daty z POPRZEDNIEGO tygodnia (np. 10, 11, 12 dni temu)
-    past_week = [date(2026, 3, 16), date(2026, 3, 17), date(2026, 3, 18)]
+    # 1. Daty z POPRZEDNIEGO tygodnia 
+    
+    today = date.today()
+    #current_week = [today, today - timedelta(days=2)]
 
+    current_week_start = today - timedelta(days=today.weekday())
+    past_week_start = current_week_start - timedelta(days=7)
+
+    past_week = [
+    past_week_start,
+    past_week_start + timedelta(days=1),
+    past_week_start + timedelta(days=2),
+]
     # 2. Daty z BIEŻĄCEGO tygodnia (dzisiaj i 2 dni temu)
     current_week = [date.today(), date.today() - timedelta(days=2)]
 

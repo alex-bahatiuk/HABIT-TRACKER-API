@@ -64,7 +64,6 @@ def calculate_weekly_streak(checks, target_per_week):
         
     today = date.today()
     current_week_start = today - timedelta(days=today.weekday())
-    #current_count = weeks.get(current_week_start, 0)
     streak = 0
 
     sorted_weeks = sorted(weeks.keys(), reverse=True)

@@ -92,9 +92,9 @@ def test_check_habit_that_has_already_been_skipped():
     assert skip_response.json()["habit_id"] == habit_id
 
     check_response = client.post(f"/habits/{habit_id}/check", json={"day": today})
+    print(check_response.status_code)
+    print(check_response.text)
     assert check_response.status_code == 201
-    # assert check_response.status_code == 400
-    # assert "Cannot check day that has already been skipped" in check_response.text
 
 # Cofanie odhaczenia (Usuwanie)
 def test_uncheck_habit_success():
