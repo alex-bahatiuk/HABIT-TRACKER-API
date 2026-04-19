@@ -1,9 +1,9 @@
 import time
 from datetime import date, timedelta
 from app.core.database import SessionLocal
-from app.models.check import HabitCheck
 from fastapi.testclient import TestClient
 from app.main import app
+from app.models.check import HabitCheck, HabitStatus
 
 client = TestClient(app)
 
@@ -13,6 +13,20 @@ def seed_checkins(habit_id, dates):
         for d in dates:
             # Tworzymy rekordy bezpośrednio w bazie, omijając walidację API
             check = HabitCheck(habit_id=habit_id, day=d)
+            db.add(check)
+        db.commit()
+    except Exception as e:
+        print(f"Błąd bazy: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+def seed_skips(habit_id, dates):
+    db = SessionLocal()
+    try:
+        for d in dates:
+            # Tworzymy rekordy bezpośrednio w bazie, omijając walidację API
+            check = HabitCheck(habit_id=habit_id, day=d, status=HabitStatus.SKIPPED)
             db.add(check)
         db.commit()
     except Exception as e:
@@ -115,14 +129,56 @@ def test_stats_streak_grace_period_ux():
 def test_stats_streak_should_persist_with_target():
     unique_name = f"TargetLogic_{time.time()}"
     # Tworzymy nawyk z celem 3 razy w tygodniu
-    habit_id = client.post("/habits",
-                           json={"name": unique_name, "target_per_week": 3}).json()["id"]
+    habit_id = client.post("/habits",json={"name": unique_name, "target_per_week": 3}).json()["id"]
 
     # Użytkownik odhaczył wczoraj i przedwczoraj (realizuje plan 3/tydzień)
     yesterday = (date.today() - timedelta(days=1)).isoformat()
     two_days_ago = (date.today() - timedelta(days=2)).isoformat()
     client.post(f"/habits/{habit_id}/check", json={"day": yesterday})
     client.post(f"/habits/{habit_id}/check", json={"day": two_days_ago})
+    name = "WeeklyGap"
+    # Tworzymy nawyk z celem 3 dni w tygodniu przez API
+    response = client.post("/habits", json={"name": name, "target_per_week": 3})
+
+    assert response.status_code == 201, f"API nie utworzyło nawyku: {response.text}"
+
+    habit_id = response.json()["id"]
+
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    tuesday = monday + timedelta(days=1)
+    thursday = monday + timedelta(days=3)
+
+    seed_checkins(habit_id, [monday, tuesday, thursday])
+
+    stats = client.get(f"/habits/{habit_id}/stats").json()
+    assert stats["streak"] >= 3
+
+
+# Streak z kilku tygodni przy celu 3/tydzień (oczekujemy utrzymania streaka)
+def test_stats_streak_should_ignore_gaps_within_target_logic():
+    name = "TargetLogic_Trap"
+    # Tworzymy nawyk: cel 3 razy w tygodniu przez API
+    habit_id = client.post("/habits", json={"name": name, "target_per_week": 3}).json()["id"]
+
+    # 1. Daty z POPRZEDNIEGO tygodnia 
+    
+    today = date.today()
+    #current_week = [today, today - timedelta(days=2)]
+
+    current_week_start = today - timedelta(days=today.weekday())
+    past_week_start = current_week_start - timedelta(days=7)
+
+    past_week = [
+    past_week_start,
+    past_week_start + timedelta(days=1),
+    past_week_start + timedelta(days=2),
+]
+    # 2. Daty z BIEŻĄCEGO tygodnia (dzisiaj i 2 dni temu)
+    current_week = [date.today(), date.today() - timedelta(days=2)]
+
+    # Wrzucamy wszystko naraz do bazy
+    seed_checkins(habit_id, past_week + current_week)
 
     response = client.get(f"/habits/{habit_id}/stats")
     stats = response.json()

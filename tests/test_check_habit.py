@@ -2,6 +2,8 @@ import time
 from datetime import date, timedelta
 from fastapi.testclient import TestClient
 from app.main import app
+from tests.test_stats import seed_checkins
+
 client = TestClient(app)
 
 # Odhaczanie dzisiaj (happy path)
@@ -57,6 +59,37 @@ def test_check_habit_twice_same_day_fail():
     # Drugi raz - Błąd
     response = client.post(f"/habits/{habit_id}/check", json={"day": today})
     assert response.status_code == 409
+
+# check habit that does not exist (no action)
+def test_check_habit_that_does_not_exist():
+    habit_resp = client.post("/habits", json={"name": "Test Habit"})
+
+    assert habit_resp.status_code == 201
+    habit_id = habit_resp.json()["id"]
+    fake_habit_id = habit_id + 1
+    check_date = date.today().isoformat()
+    
+    check_resp = client.post(f"/habits/{fake_habit_id}/skip", json={"day": check_date})
+
+    assert check_resp.status_code == 404
+    assert "Habit not found" in check_resp.text
+
+# check habit that has already been skipped (allowed/not allowed)
+def test_check_habit_that_has_already_been_skipped():
+    habit_resp = client.post("/habits", json={"name": "Test Habit"})
+
+    assert habit_resp.status_code == 201
+    habit_id = habit_resp.json()["id"]
+    today = date.today().isoformat()
+    skip_response = client.post(f"/habits/{habit_id}/skip", json={"day": today})
+
+    assert skip_response.status_code == 201
+    assert skip_response.json()["habit_id"] == habit_id
+
+    check_response = client.post(f"/habits/{habit_id}/check", json={"day": today})
+    print(check_response.status_code)
+    print(check_response.text)
+    assert check_response.status_code == 201
 
 # Cofanie odhaczenia (Usuwanie)
 def test_uncheck_habit_success():
