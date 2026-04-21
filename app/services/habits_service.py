@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from fastapi import HTTPException, status
 from datetime import date, timedelta, datetime
-
 from app.models.habit import Habit
 from app.models.check import HabitCheck, HabitStatus
 
@@ -62,6 +61,7 @@ def check_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
 
 def uncheck_habit(db: Session, habit_id: int, day: date) -> None:
     _ = get_habit(db, habit_id)
+    
     today = date.today()
     existing = db.scalar(
         select(HabitCheck).where(
@@ -114,6 +114,7 @@ def uncheck_habit(db: Session, habit_id: int, day: date) -> None:
 def skip_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
     habit = get_habit(db, habit_id)
     today = date.today()
+
     if day > today:
        raise HTTPException(status_code=400,detail="Cannot skip habit for future day")
     if day < today - timedelta(days=1):

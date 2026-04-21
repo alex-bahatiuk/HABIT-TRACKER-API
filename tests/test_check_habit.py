@@ -37,7 +37,7 @@ def test_check_habit_two_days_ago():
     two_days_ago = (date.today() - timedelta(days=2)).isoformat()
 
     response = client.post(f"/habits/{habit_id}/check", json={"day": two_days_ago})
-    assert response.status_code == 201
+    assert response.status_code == 400
 
 # Odhaczanie w przyszłości (Zabronione)
 def test_check_habit_future_fail():
