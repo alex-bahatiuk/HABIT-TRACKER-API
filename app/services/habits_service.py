@@ -1,9 +1,11 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from fastapi import HTTPException, status
-from datetime import date, timedelta, datetime
 from app.models.habit import Habit
+from datetime import date, timedelta, datetime
+
 from app.models.check import HabitCheck, HabitStatus
+from app.models.habit import Habit
 
 def create_habit(db: Session, name: str, target_per_week: int | None = None) -> Habit:
     existing = db.scalar(select(Habit).where(Habit.name == name))
@@ -119,6 +121,7 @@ def skip_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
        raise HTTPException(status_code=400,detail="Cannot skip habit for future day")
     if day < today - timedelta(days=1):
        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot skip habit more than 1 day ago")
+    
     check = db.scalar(
         select(HabitCheck).where(
             HabitCheck.habit_id == habit_id,
@@ -190,3 +193,5 @@ def undo_skip_habit(db: Session, habit_id: int, day: date) -> None:
 
     db.delete(existing)
     db.commit()
+    return min(round((strength), 2))
+
