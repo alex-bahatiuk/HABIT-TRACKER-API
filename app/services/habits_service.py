@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from fastapi import HTTPException, status
-from app.models.habit import Habit
+from app.models.habit import Habit 
 from datetime import date, timedelta, datetime
 
 from app.models.check import HabitCheck, HabitStatus
@@ -146,22 +146,33 @@ def calculate_habit_strength(db: Session, habit_id: int) -> float:
     start_date = today - timedelta(days=30)
     habit=get_habit(db, habit_id) 
 
-    stmt = select(HabitCheck).where(
-        HabitCheck.habit_id == habit_id,
-        HabitCheck.day >= start_date
-    )
+    stmt = select(HabitCheck).where(HabitCheck.habit_id == habit_id)
 
     result = db.execute(stmt)
     checks = result.scalars().all()
     unique_days = {check.day for check in checks}
     completed_days = len(unique_days)
-    days_since_creation = (today - habit.created_at.date()).days + 1
-    total_days = min(30, days_since_creation)
 
-    if total_days == 0:
+    if completed_days == 0:
         return 0.0
+    
+    first_check_date = min(unique_days)
+    days_range = (today - first_check_date).days + 1
+    total_days = min( days_range, 30) #limit to 30 days for strength calculation
+    start_date = today - timedelta(days=total_days - 1)
+    stmt_30_days = select(HabitCheck).where((HabitCheck.habit_id == habit_id) & (HabitCheck.day >= start_date))
+    checks_30_days = db.execute(stmt_30_days).scalars().all()
+    completed_days_30 = len({check.day for check in checks_30_days})
+    
     strength = (completed_days / total_days) * 100
-    return round((strength), 2)
+    print("DEBUG strength:", {
+    "completed_days": completed_days,
+    "first_check_date": first_check_date,
+    "days_range": days_range,
+    "total_days": total_days,
+    "strength": strength,})
+    return round(min(strength,100), 2)
+
 def undo_skip_habit(db: Session, habit_id: int, day: date) -> None:
     get_habit(db, habit_id)
     today = date.today()
@@ -193,5 +204,6 @@ def undo_skip_habit(db: Session, habit_id: int, day: date) -> None:
 
     db.delete(existing)
     db.commit()
-    return min(round((strength), 2))
+    
+    return round((strength), 2)
 
