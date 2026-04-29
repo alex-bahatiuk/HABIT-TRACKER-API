@@ -53,9 +53,8 @@ def test_stats_30_days():
     unique_name = f"30days_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
 
-    for i in range(30):
-        past_day = (date.today() - timedelta(days=i)).isoformat()
-        client.post(f"/habits/{habit_id}/check", json={"day": past_day})
+    past_days = [(date.today() - timedelta(days=i)) for i in range(30)]
+    seed_checkins(habit_id, past_days)
 
     response = client.get(f"/habits/{habit_id}/stats")
     stats = response.json()
@@ -66,29 +65,24 @@ def test_stats_total_count_limit_check():
     unique_name = f"LimitTest_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
 
-    for i in range(100):
-        past_day = (date.today() - timedelta(days=i)).isoformat()
-        client.post(f"/habits/{habit_id}/check", json={"day": past_day})
+    days = 100
+    past_days = [(date.today() - timedelta(days=i)) for i in range(days)]
+    seed_checkins(habit_id, past_days)
 
-    response = client.get(f"/habits/{habit_id}/stats", params={"days": 100})
+    response = client.get(f"/habits/{habit_id}/stats", params={"days": days})
     stats = response.json()
 
     actual_checks = stats.get("checked_last_days", 0)
-    assert actual_checks == 100
+    assert actual_checks == days
 
 #  Weryfikacja, czy przerwa w dniach poprawnie przerywa streak.
 def test_stats_streak_calculation_with_gap():
     unique_name = f"GapTest_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
-    today = date.today()
-    # Ciąg 3 dni (dzisiaj, wczoraj, przedwczoraj)
-    for i in range(3):
-        day = (date.today() - timedelta(days=i)).isoformat()
-        client.post(f"/habits/{habit_id}/check", json={"day": day})
 
-    # Dzień przerwy (4 dni temu puste) i wpis 5 dni temu
-    five_days_ago = (date.today() - timedelta(days=4)).isoformat()
-    client.post(f"/habits/{habit_id}/check", json={"day": five_days_ago})
+    past_days = [(date.today() - timedelta(days=i)) for i in range(5)]
+    past_days.pop(3)
+    seed_checkins(habit_id, past_days)
 
     response = client.get(f"/habits/{habit_id}/stats")
     stats = response.json()
@@ -128,15 +122,6 @@ def test_stats_streak_grace_period_ux():
 
 # Streak przy celu 3/tydzień (oczekujemy utrzymania streaka, dostaniemy 0)
 def test_stats_streak_should_persist_with_target():
-    unique_name = f"TargetLogic_{time.time()}"
-    # Tworzymy nawyk z celem 3 razy w tygodniu
-    habit_id = client.post("/habits",json={"name": unique_name, "target_per_week": 3}).json()["id"]
-
-    # Użytkownik odhaczył wczoraj i przedwczoraj (realizuje plan 3/tydzień)
-    yesterday = (date.today() - timedelta(days=1)).isoformat()
-    two_days_ago = (date.today() - timedelta(days=2)).isoformat()
-    client.post(f"/habits/{habit_id}/check", json={"day": yesterday})
-    client.post(f"/habits/{habit_id}/check", json={"day": two_days_ago})
     name = "WeeklyGap"
     # Tworzymy nawyk z celem 3 dni w tygodniu przez API
     response = client.post("/habits", json={"name": name, "target_per_week": 3})
@@ -154,6 +139,8 @@ def test_stats_streak_should_persist_with_target():
 
     stats = client.get(f"/habits/{habit_id}/stats").json()
     assert stats["streak"] >= 3
+
+    # ???
 
 
 # Streak z kilku tygodni przy celu 3/tydzień (oczekujemy utrzymania streaka)
@@ -186,3 +173,37 @@ def test_stats_streak_should_ignore_gaps_within_target_logic():
 
     # My oczekujemy, że streak wynosi co najmniej 2 (bo wczoraj i przedwczoraj było OK).
     assert stats["streak"] >= 2
+
+
+def test_stats_not_increment_after_single_skip():
+    habit_id = client.post("/habits", json={"name": "test"}).json()["id"]
+
+    client.post(f"/habits/{habit_id}/skip", json={"day": date.today().isoformat()})
+
+    response = client.get(f"/habits/{habit_id}/stats")
+    assert response.status_code == 200
+
+    stats_data = response.json()
+
+    result = stats_data["checked_last_days"] == 0 and stats_data["streak"] == 0
+
+    assert result, f"expected no last days checked and 0 day streak, got {stats_data["checked_last_days"]} last days and {stats_data["streak"]} day streak"
+
+def test_stats_30_days_skip_between_checks():
+
+    habit_id = client.post("/habits", json={"name": "test"}).json()["id"]
+
+    past_days = [(date.today() - timedelta(days=i)) for i in range(30)]
+    past_days.pop(9)
+
+    seed_checkins(habit_id, past_days)
+
+    skip_day = date.today() - timedelta(days=9)
+    seed_skips(habit_id, [skip_day])
+
+    response = client.get(f"/habits/{habit_id}/stats")
+    stats_data = response.json()
+
+    result = stats_data["checked_last_days"] == 9 and stats_data["streak"] == 29
+
+    assert result, f"expected 9 last days checked and 29 day streak, got {stats_data["checked_last_days"]} last days and {stats_data["streak"]} day streak"
