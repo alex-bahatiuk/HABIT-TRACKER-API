@@ -10,7 +10,7 @@ def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
     habit = get_habit(db, habit_id)
 
     today = date.today()
-    start = today - timedelta(days=days - 1 )
+    start = today - timedelta(days=days-1)
 
     checks = list(
         db.scalars(
@@ -26,8 +26,8 @@ def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
     else:
         print("Calculating daily streak...")
         streak = calculate_daily_streak(checks)
-    print("target per week=", habit.target_per_week)
-    print("checks=", [c.day for c in checks])
+        print("target per week=", habit.target_per_week)
+        print("checks=", [c.day for c in checks])
     return {
         "habit_id": habit_id,
         "streak": streak,
@@ -51,7 +51,9 @@ def calculate_daily_streak(checks):
     while cur in checked_days:
         streak += 1
         cur -= timedelta(days=1)
-
+    print("ALL CHECKS:", [(c.day, c.status) for c in checks])
+    print("CHECKED DAYS:", checked_days)
+    print("STREAK:", streak)
     return streak
 
 def calculate_weekly_streak(checks, target_per_week):
@@ -77,6 +79,7 @@ def calculate_weekly_streak(checks, target_per_week):
                 streak += count
         else:
                 break
+
     return streak
 
 

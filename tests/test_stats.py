@@ -80,7 +80,7 @@ def test_stats_total_count_limit_check():
 def test_stats_streak_calculation_with_gap():
     unique_name = f"GapTest_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
-
+    today = date.today()
     # Ciąg 3 dni (dzisiaj, wczoraj, przedwczoraj)
     for i in range(3):
         day = (date.today() - timedelta(days=i)).isoformat()
@@ -101,7 +101,7 @@ def test_stats_streak_calculation_with_gap():
 def test_stats_should_allow_more_than_365_days():
     unique_name = f"LongTerm_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
-
+    #today= date.today()
     response = client.get(f"/habits/{habit_id}/stats", params={"days": 400})
 
     assert response.status_code == 200

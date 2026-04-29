@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from fastapi import HTTPException, status
 from app.models.habit import Habit 
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 
 from app.models.check import HabitCheck, HabitStatus
 from app.models.habit import Habit
@@ -142,7 +142,7 @@ def skip_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
     return check
 
 def calculate_habit_strength(db: Session, habit_id: int) -> float:
-    today = datetime.utcnow().date()
+    today = date.today()
     start_date = today - timedelta(days=30)
     habit=get_habit(db, habit_id) 
 

@@ -34,6 +34,7 @@ def delete(habit_id: int, db: Session = Depends(db_session)):
 
 @router.post("/{habit_id}/check", response_model=CheckOut, status_code=status.HTTP_201_CREATED)
 def check(habit_id: int, payload: CheckCreate, db: Session = Depends(db_session)):
+    print(f"Checking habit {habit_id} for day {payload.day}")
     return habits_service.check_habit(db, habit_id, payload.day)
 
 @router.delete("/{habit_id}/check", status_code=status.HTTP_204_NO_CONTENT)

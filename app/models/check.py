@@ -11,6 +11,7 @@ class HabitStatus(str, Enum):
 
 class HabitCheck(Base):
     __tablename__ = "habit_checks"
+    __table_args__ = (UniqueConstraint("habit_id", "day", name="uq_habit_day"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
