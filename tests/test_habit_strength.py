@@ -57,7 +57,7 @@ def test_habit_strength_5_checks_10_days():
     assert habit_resp.status_code == 201
     habit_id = habit_resp.json()["id"]
 
-    past_days = [(date.today() - timedelta(days=i)) for i in range(0, 10, 2)]
+    past_days = [(date.today() - timedelta(days=i + 1)) for i in range(0, 10, 2)]
 
     seed_checkins(habit_id, past_days)
 
@@ -75,7 +75,7 @@ def test_habit_strength_20_checks_35_days_15_checks_30_days():
     assert habit_resp.status_code == 201
     habit_id = habit_resp.json()["id"]
 
-    past_days = [(date.today() - timedelta(days=i)) for i in range(0, 30, 2)]
+    past_days = [(date.today() - timedelta(days=i+1)) for i in range(0, 30, 2)]
     past_days = past_days + [(date.today() - timedelta(days=30+i)) for i in range(5)]
 
     seed_checkins(habit_id, past_days)
