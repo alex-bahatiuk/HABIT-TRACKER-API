@@ -2,9 +2,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from datetime import date, timedelta
 
-from app.models.check import HabitCheck
+from app.models.check import HabitCheck,HabitStatus
 from app.services.habits_service import get_habit
-from app.models.habit import Habit
+#from app.models.habit import Habit
 
 def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
     habit = get_habit(db, habit_id)
@@ -19,13 +19,15 @@ def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
             .order_by(HabitCheck.day.asc())
         )
     )
-    checked_days = {c.day for c in checks}
+    done_checks = {c for c in checks if c.status == HabitStatus.DONE}
+    checked_days = {c.day for c in done_checks}
+    #done_checks = checks
     if habit.target_per_week is not None:
         print("Calculating weekly streak...")
-        streak = calculate_weekly_streak(checks, habit.target_per_week)
+        streak = calculate_weekly_streak(done_checks, habit.target_per_week)
     else:
         print("Calculating daily streak...")
-        streak = calculate_daily_streak(checks)
+        streak = calculate_daily_streak(done_checks)
         print("target per week=", habit.target_per_week)
         print("checks=", [c.day for c in checks])
     return {
@@ -38,22 +40,36 @@ def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
     }
 
 def calculate_daily_streak(checks):
-    checked_days = {c.day for c in checks}
+    checked_days = {c.day: c.status for c in checks}
     today = date.today()
 
     if today in checked_days:
          cur = today 
     else:
-            cur = today - timedelta(days=1)
+        cur = today - timedelta(days=1)
+
+    #cur = today if today in checked_days else today - timedelta(days=1)
 
     streak = 0
 
     while cur in checked_days:
-        streak += 1
+        status = checked_days[cur]
+
+        if status == HabitStatus.DONE:
+            streak += 1
+
+        elif status == HabitStatus.SKIPPED:
+            pass  # пропускаем день, не обрывая серию
+        else:
+            break  # если день не отмечен как DONE или SKIPPED, прерываем серию
         cur -= timedelta(days=1)
-    print("ALL CHECKS:", [(c.day, c.status) for c in checks])
-    print("CHECKED DAYS:", checked_days)
+    
+
+    #print("ALL CHECKS:", [(c.day, c.status) for c in checks])
+    #print("CHECKED DAYS:", checked_days)
     print("STREAK:", streak)
+    print("SKIPPED CHECKS:", [(c.day, c.status) for c in checks if c.status == HabitStatus.SKIPPED])
+    print("DONE CHECKS:", [(c.day, c.status) for c in checks if c.status == HabitStatus.DONE])
     return streak
 
 def calculate_weekly_streak(checks, target_per_week):
