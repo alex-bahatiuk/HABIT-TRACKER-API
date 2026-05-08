@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from fastapi import HTTPException, status
 from app.models.habit import Habit 
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 
 from app.models.check import HabitCheck, HabitStatus
 from app.models.habit import Habit
@@ -142,7 +142,7 @@ def skip_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
     return check
 
 def calculate_habit_strength(db: Session, habit_id: int) -> float:
-    today = datetime.utcnow().date()
+    today = date.today()
     start_date = today - timedelta(days=30)
     habit=get_habit(db, habit_id) 
 
@@ -160,11 +160,11 @@ def calculate_habit_strength(db: Session, habit_id: int) -> float:
     days_range = (today - first_check_date).days + 1
     total_days = min( days_range, 30) #limit to 30 days for strength calculation
     start_date = today - timedelta(days=total_days - 1)
-    stmt_30_days = select(HabitCheck).where((HabitCheck.habit_id == habit_id) & (HabitCheck.day >= start_date))
-    checks_30_days = db.execute(stmt_30_days).scalars().all()
-    completed_days_30 = len({check.day for check in checks_30_days})
+
+    checks_30 = [check.day for check in checks if check.day >= start_date] 
+    completed_days_30 = len(set(checks_30))
     
-    strength = (completed_days / total_days) * 100
+    strength = (completed_days_30 / total_days) * 100
     print("DEBUG strength:", {
     "completed_days": completed_days,
     "first_check_date": first_check_date,

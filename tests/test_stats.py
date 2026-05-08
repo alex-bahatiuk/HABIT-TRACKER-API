@@ -95,7 +95,7 @@ def test_stats_streak_calculation_with_gap():
 def test_stats_should_allow_more_than_365_days():
     unique_name = f"LongTerm_{time.time()}"
     habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
-
+    #today= date.today()
     response = client.get(f"/habits/{habit_id}/stats", params={"days": 400})
 
     assert response.status_code == 200
@@ -201,7 +201,20 @@ def test_stats_30_days_skip_between_checks():
     skip_day = date.today() - timedelta(days=9)
     seed_skips(habit_id, [skip_day])
 
+    from app.core.database import SessionLocal
+    from app.models.check import HabitCheck
+
+    db = SessionLocal()
+    rows = db.query(HabitCheck).filter(HabitCheck.habit_id == habit_id).all()
+
+    print("DB ROWS:", [(r.day, r.status) for r in rows])
+
+    db.close()
+
     response = client.get(f"/habits/{habit_id}/stats")
+
+    print("RESPONSE:", response.json())
+
     stats_data = response.json()
 
     result = stats_data["checked_last_days"] == 9 and stats_data["streak"] == 29
