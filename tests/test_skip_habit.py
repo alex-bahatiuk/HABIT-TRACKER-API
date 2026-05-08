@@ -124,3 +124,14 @@ def test_undo_skip_habit_from_two_days_ago():
     assert response.status_code == 400
     assert "Cannot undo skip more than 1 day ago" in response.text
 
+def test_stats_not_increment_after_single_skip():
+    habit_id = client.post("/habits", json={"name": "test"}).json()["id"]
+
+    client.post(f"/habits/{habit_id}/skip", json={"day": date.today().isoformat()})
+
+    response = client.get(f"/habits/{habit_id}/stats")
+    assert response.status_code == 200
+
+    stats_data = response.json()
+    assert stats_data["checked_last_days"] == 0, f"expected no last days checked, got {stats_data["checked_last_days"]}"
+    assert stats_data["streak"] == 0, f"expected 0 day streak, got {stats_data["streak"]}" 

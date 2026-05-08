@@ -201,19 +201,19 @@ def test_stats_30_days_skip_between_checks():
     skip_day = date.today() - timedelta(days=9)
     seed_skips(habit_id, [skip_day])
 
-    from app.core.database import SessionLocal
-    from app.models.check import HabitCheck
+    #from app.core.database import SessionLocal
+    #from app.models.check import HabitCheck
 
-    db = SessionLocal()
-    rows = db.query(HabitCheck).filter(HabitCheck.habit_id == habit_id).all()
+    #db = SessionLocal()
+    #rows = db.query(HabitCheck).filter(HabitCheck.habit_id == habit_id).all()
 
-    print("DB ROWS:", [(r.day, r.status) for r in rows])
+    #print("DB ROWS:", [(r.day, r.status) for r in rows])
 
-    db.close()
+    #db.close()
 
     response = client.get(f"/habits/{habit_id}/stats")
 
-    print("RESPONSE:", response.json())
+    #print("RESPONSE:", response.json())
 
     stats_data = response.json()
 
