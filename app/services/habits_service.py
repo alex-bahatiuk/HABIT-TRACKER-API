@@ -144,7 +144,7 @@ def skip_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
 def calculate_habit_strength(db: Session, habit_id: int) -> float:
     today = date.today()
     start_date = today - timedelta(days=30)
-    habit=get_habit(db, habit_id) 
+    abit=get_habit(db, habit_id) 
 
     stmt = select(HabitCheck).where(HabitCheck.habit_id == habit_id)
 
@@ -205,5 +205,5 @@ def undo_skip_habit(db: Session, habit_id: int, day: date) -> None:
     db.delete(existing)
     db.commit()
     
-    return round((strength), 2)
+    return round(0.0, 2)
 
