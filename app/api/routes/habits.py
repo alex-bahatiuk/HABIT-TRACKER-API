@@ -54,3 +54,4 @@ def skip_habit_endpoint(habit_id: int, payload: CheckCreate, db: Session = Depen
 def get_habit_strength(habit_id: int, db: Session = Depends(db_session)):
     strength = habits_service.calculate_habit_strength(db, habit_id)
     return HabitStrengthOut(habit_id=habit_id, strength=strength)
+

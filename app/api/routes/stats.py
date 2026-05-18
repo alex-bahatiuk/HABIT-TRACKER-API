@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import db_session
+from app.schemas.check import StatsResponse
 from app.services.stats_service import get_stats
 from app.services.habits_service import get_habit
 
 router = APIRouter(prefix="/habits", tags=["stats"])
 
-@router.get("/{habit_id}/stats")
+@router.get("/{habit_id}/stats", response_model=StatsResponse)
 def stats(
     habit_id: int,
     days: int = Query(30, ge=1),

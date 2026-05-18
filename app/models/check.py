@@ -39,3 +39,5 @@ class HabitCheck(Base):
         UniqueConstraint("habit_id", "day", name="uq_habit_day"),
     )
     status:Mapped[HabitStatus] = mapped_column(SqlEnum(HabitStatus), nullable=False, default=HabitStatus.DONE)
+
+   
