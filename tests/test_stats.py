@@ -1,6 +1,7 @@
 import time
 from datetime import date, timedelta
 from app.core.database import SessionLocal
+from freezegun import freeze_time
 
 from fastapi.testclient import TestClient
 from app.main import app
@@ -121,6 +122,7 @@ def test_stats_streak_grace_period_ux():
 """ SUGESTIA UX: Weryfikacja, czy streak jest utrzymywany przy targecie/tyd < 7. """
 
 # Streak przy celu 3/tydzień (oczekujemy utrzymania streaka, dostaniemy 0)
+@freeze_time("2026-05-03")
 def test_stats_streak_should_persist_with_target():
     name = "WeeklyGap"
     # Tworzymy nawyk z celem 3 dni w tygodniu przez API
@@ -141,6 +143,7 @@ def test_stats_streak_should_persist_with_target():
     assert stats["streak"] >= 3
 
 # Streak z kilku tygodni przy celu 3/tydzień (oczekujemy utrzymania streaka)
+@freeze_time("2026-05-03") # niedziela
 def test_stats_streak_should_ignore_gaps_within_target_logic():
     name = "TargetLogic_Trap"
     # Tworzymy nawyk: cel 3 razy w tygodniu przez API
@@ -154,22 +157,83 @@ def test_stats_streak_should_ignore_gaps_within_target_logic():
     current_week_start = today - timedelta(days=today.weekday())
     past_week_start = current_week_start - timedelta(days=7)
 
-    past_week = [
-    past_week_start,
-    past_week_start + timedelta(days=1),
-    past_week_start + timedelta(days=2),
-]
+    past_week_checks = [
+        past_week_start,
+        past_week_start + timedelta(days=2),
+    ]
+    past_week_skips = [
+        past_week_start + timedelta(days=1),
+    ]
     # 2. Daty z BIEŻĄCEGO tygodnia (dzisiaj i 2 dni temu)
     current_week = [date.today(), date.today() - timedelta(days=2)]
 
     # Wrzucamy wszystko naraz do bazy
-    seed_checkins(habit_id, past_week + current_week)
+    seed_checkins(habit_id, past_week_checks + current_week)
+    seed_skips(habit_id, past_week_skips)
 
     response = client.get(f"/habits/{habit_id}/stats")
     stats = response.json()
 
     # My oczekujemy, że streak wynosi co najmniej 2 (bo wczoraj i przedwczoraj było OK).
-    assert stats["streak"] >= 2
+    assert stats["streak"] == 5, f"expected 5 day streak, got {stats["streak"]}"
+
+@freeze_time("2026-05-03") # niedziela
+def test_stats_incomplete_week_between_complete_ones():
+    name = "test habit"
+    habit_id = client.post("/habits", json={"name": name, "target_per_week": 2}).json()["id"]
+
+    today = date.today()
+    current_week_start = today - timedelta(days=today.weekday())
+    one_week_ago_start = current_week_start - timedelta(days=7)
+    two_weeks_ago_start = one_week_ago_start - timedelta(days=7)
+
+    current_week_checks = [
+        current_week_start,
+        current_week_start + timedelta(days=3),
+    ]
+
+    one_week_ago_checks = [
+        one_week_ago_start + timedelta(days=5),
+    ]
+
+    two_weeks_ago_checks = [
+        two_weeks_ago_start,
+        two_weeks_ago_start + timedelta(days=1),
+    ]
+
+    seed_checkins(habit_id, two_weeks_ago_checks + one_week_ago_checks + current_week_checks)
+
+    response = client.get(f"/habits/{habit_id}/stats")
+    stats = response.json()
+
+    assert stats["streak"] == 2, f"expected 2 day streak, got {stats["streak"]}"
+
+@freeze_time("2026-05-03") # niedziela
+def test_stats_blank_week_between_complete_ones():
+    name = "test habit"
+    habit_id = client.post("/habits", json={"name": name, "target_per_week": 2}).json()["id"]
+
+    today = date.today()
+    current_week_start = today - timedelta(days=today.weekday())
+    one_week_ago_start = current_week_start - timedelta(days=7)
+    two_weeks_ago_start = one_week_ago_start - timedelta(days=7)
+
+    current_week_checks = [
+        current_week_start,
+        current_week_start + timedelta(days=3),
+    ]
+
+    two_weeks_ago_checks = [
+        two_weeks_ago_start,
+        two_weeks_ago_start + timedelta(days=1),
+    ]
+
+    seed_checkins(habit_id, two_weeks_ago_checks + current_week_checks)
+
+    response = client.get(f"/habits/{habit_id}/stats")
+    stats = response.json()
+
+    assert stats["streak"] == 2, f"expected 2 day streak, got {stats["streak"]}"
 
 
 def test_stats_not_increment_after_single_skip():
