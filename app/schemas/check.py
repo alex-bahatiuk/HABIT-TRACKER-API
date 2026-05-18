@@ -11,3 +11,8 @@ class CheckOut(BaseModel):
     status: HabitStatus
     class Config:
         from_attributes = True
+
+class StatsResponse(BaseModel):
+    streak: int
+    checked_last_days: int
+   

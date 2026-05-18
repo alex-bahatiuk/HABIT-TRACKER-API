@@ -85,7 +85,7 @@ def calculate_checked_last_days(checks):
 
     return count
 
-def calculate_weekly_streak(checks, target_per_week):
+def calculate_weekly_streak(checks, target_per_week, today=None):
 
     weeks = { }
 
@@ -93,7 +93,7 @@ def calculate_weekly_streak(checks, target_per_week):
             week_start = check.day - timedelta(days=check.day.weekday())  # начало недели (понедельник)
             weeks[week_start] = weeks.get(week_start, 0) + 1
         
-    today = date.today()
+    today = today or date.today()  # Позволяет передать конкретную дату для тестирования вместо
     current_week_start = today - timedelta(days=today.weekday())
     streak = 0
 

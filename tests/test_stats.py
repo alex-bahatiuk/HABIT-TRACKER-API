@@ -140,9 +140,6 @@ def test_stats_streak_should_persist_with_target():
     stats = client.get(f"/habits/{habit_id}/stats").json()
     assert stats["streak"] >= 3
 
-    # ???
-
-
 # Streak z kilku tygodni przy celu 3/tydzień (oczekujemy utrzymania streaka)
 def test_stats_streak_should_ignore_gaps_within_target_logic():
     name = "TargetLogic_Trap"
