@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict,BaseModel, Field
 
 class HabitCreate(BaseModel):
    name: str = Field(min_length=1, max_length=120)
@@ -8,13 +8,12 @@ class HabitOut(BaseModel):
     id: int
     name: str
     target_per_week: int | None = None
-
-    class Config:
-        from_attributes = True
-
+    
+    model_config = ConfigDict(from_attributes=True)
+    
 class HabitStrengthOut(BaseModel):
     habit_id: int
     strength: float
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+    

@@ -165,12 +165,7 @@ def calculate_habit_strength(db: Session, habit_id: int) -> float:
     completed_days_30 = len(set(checks_30))
     
     strength = (completed_days_30 / total_days) * 100
-    print("DEBUG strength:", {
-    "completed_days": completed_days,
-    "first_check_date": first_check_date,
-    "days_range": days_range,
-    "total_days": total_days,
-    "strength": strength,})
+    
     return round(min(strength,100), 2)
 
 def undo_skip_habit(db: Session, habit_id: int, day: date) -> None:
