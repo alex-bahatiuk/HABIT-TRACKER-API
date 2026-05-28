@@ -3,7 +3,6 @@ from sqlalchemy import select
 from datetime import date, timedelta
 from app.models.check import HabitCheck,HabitStatus
 from app.services.habits_service import get_habit
-#from app.models.habit import Habit
 
 def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
     habit = get_habit(db, habit_id)
@@ -63,9 +62,6 @@ def calculate_daily_streak(checks):
             break  
         cur -= timedelta(days=1)
     
-    print("STREAK:", streak)
-    print("SKIPPED CHECKS:", [(c.day, c.status) for c in skipped_checks if c.status == HabitStatus.SKIPPED])
-    print("DONE CHECKS:", [(c.day, c.status) for c in checks if c.status == HabitStatus.DONE])
     return streak
 
 def calculate_checked_last_days(checks):
@@ -86,28 +82,33 @@ def calculate_checked_last_days(checks):
     return count
 
 def calculate_weekly_streak(checks, target_per_week, today=None):
+    today = today or date.today()  
+    current_week_start = today - timedelta(days=today.weekday())
 
     weeks = { }
 
     for check in checks:
-            week_start = check.day - timedelta(days=check.day.weekday())  # начало недели (понедельник)
+            check_date = check.day #if hasattr(check, "date") else check
+            week_start = check_date - timedelta(days=check_date.weekday())  
             weeks[week_start] = weeks.get(week_start, 0) + 1
         
-    today = today or date.today()  # Позволяет передать конкретную дату для тестирования вместо
-    current_week_start = today - timedelta(days=today.weekday())
     streak = 0
 
-    sorted_weeks = sorted(weeks.keys(), reverse=True)
-    print("Weeks:", sorted_weeks)
-    for week in sorted_weeks:
-        if week == current_week_start:
-                streak += weeks[week]  
-                continue  
-        count = weeks[week]
+    # текущая неделя добавляется как есть
+    current_count = weeks.get(current_week_start, 0)
+    streak += current_count
+
+    # дальше идём строго неделя за неделей назад
+    week = current_week_start - timedelta(days=7)
+
+    while True:
+        count = weeks.get(week, 0)
+
         if count >= target_per_week:
-                streak += count
+            streak += count
+            week -= timedelta(days=7)
         else:
-                break
+            break
 
     return streak
 

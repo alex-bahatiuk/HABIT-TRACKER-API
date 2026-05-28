@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel
+from pydantic import ConfigDict,BaseModel
 from app.models.check import HabitStatus
 class CheckCreate(BaseModel):
     day: date  # клиент передаёт конкретный день
@@ -9,8 +9,8 @@ class CheckOut(BaseModel):
     habit_id: int
     day: date
     status: HabitStatus
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 class StatsResponse(BaseModel):
     streak: int

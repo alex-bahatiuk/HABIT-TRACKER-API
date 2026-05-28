@@ -55,5 +55,5 @@ def calculate_completed_week_streak(
             week_start = week_start.fromordinal(week_start.toordinal() - 7)
         else:
             break
-
+    
     return streak
