@@ -7,36 +7,38 @@ from datetime import date, timedelta
 from app.models.check import HabitCheck, HabitStatus
 from app.models.habit import Habit
 
-def create_habit(db: Session, name: str, target_per_week: int | None = None) -> Habit:
-    existing = db.scalar(select(Habit).where(Habit.name == name))
+def create_habit(db: Session, name: str, target_per_week: int | None,
+                 owner_id: int) -> Habit:
+    existing = db.scalar(select(Habit).where(Habit.name == name,
+                                             Habit.owner_id == owner_id))
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Habit with this name already exists"
         )
 
-    habit = Habit(name=name, target_per_week=target_per_week)
+    habit = Habit(name=name, target_per_week=target_per_week, owner_id=owner_id)
     db.add(habit)
     db.commit()
     db.refresh(habit)
     return habit
 
-def list_habits(db: Session) -> list[Habit]:
-    return list(db.scalars(select(Habit).order_by(Habit.id)))
+def list_habits(db: Session, owner_id: int) -> list[Habit]:
+    return list(db.scalars(select(Habit).where(Habit.owner_id == owner_id).order_by(Habit.id)))
 
-def get_habit(db: Session, habit_id: int) -> Habit:
-    habit = db.get(Habit, habit_id)
+def get_habit(db: Session, habit_id: int, owner_id: int) -> Habit:
+    habit = db.scalar(select(Habit).where(Habit.id == habit_id, Habit.owner_id == owner_id))
     if not habit:
         raise HTTPException(status_code=404, detail="Habit not found")
     return habit
 
-def delete_habit(db: Session, habit_id: int) -> None:
-    habit = get_habit(db, habit_id)
+def delete_habit(db: Session, habit_id: int, owner_id: int) -> None:
+    habit = get_habit(db, habit_id, owner_id)
     db.delete(habit)
     db.commit()
 
-def check_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
-    _ = get_habit(db, habit_id)
+def check_habit(db: Session, habit_id: int, day: date, owner_id: int) -> HabitCheck:
+    _ = get_habit(db, habit_id, owner_id)
     today = date.today()
     # !zapret budushih dat
     if day > today:
@@ -61,9 +63,9 @@ def check_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
     db.refresh(existing)
     return existing
 
-def uncheck_habit(db: Session, habit_id: int, day: date) -> None:
-    _ = get_habit(db, habit_id)
-    
+def uncheck_habit(db: Session, habit_id: int, day: date, owner_id: int) -> None:
+    _ = get_habit(db, habit_id, owner_id)
+
     today = date.today()
     existing = db.scalar(
         select(HabitCheck).where(
@@ -144,7 +146,7 @@ def skip_habit(db: Session, habit_id: int, day: date) -> HabitCheck:
 def calculate_habit_strength(db: Session, habit_id: int) -> float:
     today = date.today()
     start_date = today - timedelta(days=30)
-    habit=get_habit(db, habit_id) 
+    #habit=get_habit(db, habit_id) 
 
     stmt = select(HabitCheck).where(HabitCheck.habit_id == habit_id)
 

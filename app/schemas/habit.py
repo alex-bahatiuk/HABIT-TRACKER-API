@@ -1,5 +1,6 @@
 from pydantic import ConfigDict,BaseModel, Field
-
+from app.models.user import User
+from app.services.dependencies import get_current_user
 class HabitCreate(BaseModel):
    name: str = Field(min_length=1, max_length=120)
    target_per_week: int | None = Field(default=None, ge=1, le=7)
