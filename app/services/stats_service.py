@@ -4,8 +4,8 @@ from datetime import date, timedelta
 from app.models.check import HabitCheck,HabitStatus
 from app.services.habits_service import get_habit
 
-def get_stats(db: Session, habit_id: int, days: int = 30) -> dict:
-    habit = get_habit(db, habit_id)
+def get_stats(db: Session, habit_id: int, days: int = 30, owner_id: int | None = None) -> dict:
+    habit = get_habit(db, habit_id, owner_id)
 
     today = date.today()
     start = today - timedelta(days=days-1)

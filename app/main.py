@@ -3,7 +3,6 @@ from app.core.database import Base, engine
 from app.api.routes.habits import router as habits_router
 from app.api.routes.stats import router as stats_router
 from app.api.routes.auth import router as auth_router
-from app.models.user import User
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Habit Tracker API")
