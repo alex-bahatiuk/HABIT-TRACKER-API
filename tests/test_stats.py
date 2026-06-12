@@ -77,7 +77,7 @@ def test_stats_total_count_limit_check():
     response = client.get(f"/habits/{habit_id}/stats", params={"days": days}, headers=headers)
     stats = response.json()
 
-    actual_checks = stats.get("checked_last_days", 0)#, headers=headers)
+    actual_checks = stats.get("checked_last_days", 0)
     assert actual_checks == days
 
 #  Weryfikacja, czy przerwa w dniach poprawnie przerywa streak.
