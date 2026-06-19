@@ -27,3 +27,4 @@ def test_register_empty_password_failure():
     register_res = client.post("/auth/register", json={"email": email, "password": password})
 
     assert register_res.status_code == 422
+
