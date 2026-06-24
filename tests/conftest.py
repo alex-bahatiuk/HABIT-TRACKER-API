@@ -47,7 +47,7 @@ def clean_database():
 
 def authenticate():
     email = "fixed@mail.com"
-    password = "password"
+    password = "84@W84@w"
     client.post("/auth/register", json={"email": email, "password": password})
 
     res = client.post("/auth/login", data={"username": email, "password": password})

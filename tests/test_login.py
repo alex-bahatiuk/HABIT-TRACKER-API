@@ -5,7 +5,7 @@ client = TestClient(app)
 
 def test_login_valid_data_success():
     email = "user@mail.com"
-    password = "password"
+    password = "84@W84@w"
     client.post("/auth/register", json={"email": email, "password": password})
 
     login_res = client.post("/auth/login", data={"username": email, "password": password})
@@ -14,7 +14,7 @@ def test_login_valid_data_success():
 
 def test_login_unregistered_email_failure():
     email = "user@mail.com"
-    password = "password"
+    password = "84@W84@w"
     client.post("/auth/register", json={"email": email, "password": password})
 
     unregistered_email = "admin@mail.net"
@@ -24,7 +24,7 @@ def test_login_unregistered_email_failure():
 
 def test_login_invalid_password_failure():
     email = "user@mail.com"
-    password = "password"
+    password = "84@W84@w"
     client.post("/auth/register", json={"email": email, "password": password})
 
     invalid_password = "drowssap"
