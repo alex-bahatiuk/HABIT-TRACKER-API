@@ -6,6 +6,7 @@ from freezegun import freeze_time
 from fastapi.testclient import TestClient
 from app.main import app
 from app.models.check import HabitCheck, HabitStatus
+from tests.conftest import authenticate
 
 client = TestClient(app)
 
@@ -38,12 +39,13 @@ def seed_skips(habit_id, dates):
         db.close()
 
 def test_stats_increment_after_single_checkin():
+    headers = authenticate()
     unique_name = f"StatTest_{time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    habit_id = client.post("/habits", json={"name": unique_name}, headers=headers).json()["id"]
 
-    client.post(f"/habits/{habit_id}/check", json={"day": date.today().isoformat()})
+    client.post(f"/habits/{habit_id}/check", json={"day": date.today().isoformat()}, headers=headers)
 
-    response = client.get(f"/habits/{habit_id}/stats")
+    response = client.get(f"/habits/{habit_id}/stats", headers=headers)
     assert response.status_code == 200
 
     stats_data = response.json()
@@ -51,26 +53,28 @@ def test_stats_increment_after_single_checkin():
     assert stats_data["checked_last_days"] == 1
 
 def test_stats_30_days():
+    headers = authenticate()
     unique_name = f"30days_{time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    habit_id = client.post("/habits", json={"name": unique_name}, headers=headers).json()["id"]
 
     past_days = [(date.today() - timedelta(days=i)) for i in range(30)]
     seed_checkins(habit_id, past_days)
 
-    response = client.get(f"/habits/{habit_id}/stats")
+    response = client.get(f"/habits/{habit_id}/stats", headers=headers)
     stats = response.json()
 
     assert stats["checked_last_days"] == 30
 
 def test_stats_total_count_limit_check():
+    headers = authenticate()
     unique_name = f"LimitTest_{time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    habit_id = client.post("/habits", json={"name": unique_name}, headers=headers).json()["id"]
 
     days = 100
     past_days = [(date.today() - timedelta(days=i)) for i in range(days)]
     seed_checkins(habit_id, past_days)
 
-    response = client.get(f"/habits/{habit_id}/stats", params={"days": days})
+    response = client.get(f"/habits/{habit_id}/stats", params={"days": days}, headers=headers)
     stats = response.json()
 
     actual_checks = stats.get("checked_last_days", 0)
@@ -78,14 +82,15 @@ def test_stats_total_count_limit_check():
 
 #  Weryfikacja, czy przerwa w dniach poprawnie przerywa streak.
 def test_stats_streak_calculation_with_gap():
+    headers = authenticate()
     unique_name = f"GapTest_{time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    habit_id = client.post("/habits", json={"name": unique_name}, headers=headers).json()["id"]
 
     past_days = [(date.today() - timedelta(days=i)) for i in range(5)]
     past_days.pop(3)
     seed_checkins(habit_id, past_days)
 
-    response = client.get(f"/habits/{habit_id}/stats")
+    response = client.get(f"/habits/{habit_id}/stats", headers=headers)
     stats = response.json()
 
     # Streak powinien liczyć ciąg wstecz od dzisiaj (3 dni), ignorując wpis sprzed przerwy
@@ -94,10 +99,11 @@ def test_stats_streak_calculation_with_gap():
 
 # TEST LIMITU 365 DNI
 def test_stats_should_allow_more_than_365_days():
+    headers = authenticate()
     unique_name = f"LongTerm_{time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    habit_id = client.post("/habits", json={"name": unique_name}, headers=headers).json()["id"]
     #today= date.today()
-    response = client.get(f"/habits/{habit_id}/stats", params={"days": 400})
+    response = client.get(f"/habits/{habit_id}/stats", params={"days": 400}, headers=headers)
 
     assert response.status_code == 200
 
@@ -106,14 +112,15 @@ def test_stats_should_allow_more_than_365_days():
 nie został jeszcze odhaczony (szansa dla użytkownika). """
 
 def test_stats_streak_grace_period_ux():
+    headers = authenticate()
     unique_name = f"UX_Test_{time.time()}"
-    habit_id = client.post("/habits", json={"name": unique_name}).json()["id"]
+    habit_id = client.post("/habits", json={"name": unique_name}, headers=headers).json()["id"]
 
     # Odhaczamy tylko wczoraj
     yesterday = (date.today() - timedelta(days=1)).isoformat()
-    client.post(f"/habits/{habit_id}/check", json={"day": yesterday})
+    client.post(f"/habits/{habit_id}/check", json={"day": yesterday}, headers=headers)
 
-    response = client.get(f"/habits/{habit_id}/stats")
+    response = client.get(f"/habits/{habit_id}/stats", headers=headers)
     stats = response.json()
 
     # Oczekiwanie: Streak wynosi 1 (utrzymanie passy z wczoraj do końca bieżącego dnia)
@@ -124,9 +131,10 @@ def test_stats_streak_grace_period_ux():
 # Streak przy celu 3/tydzień (oczekujemy utrzymania streaka, dostaniemy 0)
 @freeze_time("2026-05-03")
 def test_stats_streak_should_persist_with_target():
+    headers = authenticate()
     name = "WeeklyGap"
     # Tworzymy nawyk z celem 3 dni w tygodniu przez API
-    response = client.post("/habits", json={"name": name, "target_per_week": 3})
+    response = client.post("/habits", json={"name": name, "target_per_week": 3}, headers=headers)
 
     assert response.status_code == 201, f"API nie utworzyło nawyku: {response.text}"
 
@@ -139,15 +147,16 @@ def test_stats_streak_should_persist_with_target():
 
     seed_checkins(habit_id, [monday, tuesday, thursday])
 
-    stats = client.get(f"/habits/{habit_id}/stats").json()
+    stats = client.get(f"/habits/{habit_id}/stats", headers=headers).json()
     assert stats["streak"] >= 3
 
 # Streak z kilku tygodni przy celu 3/tydzień (oczekujemy utrzymania streaka)
 @freeze_time("2026-05-03") # niedziela
 def test_stats_streak_should_ignore_gaps_within_target_logic():
+    headers = authenticate()
     name = "TargetLogic_Trap"
     # Tworzymy nawyk: cel 3 razy w tygodniu przez API
-    habit_id = client.post("/habits", json={"name": name, "target_per_week": 3}).json()["id"]
+    habit_id = client.post("/habits", json={"name": name, "target_per_week": 3}, headers=headers).json()["id"]
 
     # 1. Daty z POPRZEDNIEGO tygodnia 
     
@@ -171,7 +180,7 @@ def test_stats_streak_should_ignore_gaps_within_target_logic():
     seed_checkins(habit_id, past_week_checks + current_week)
     seed_skips(habit_id, past_week_skips)
 
-    response = client.get(f"/habits/{habit_id}/stats")
+    response = client.get(f"/habits/{habit_id}/stats", headers=headers)
     stats = response.json()
 
     # My oczekujemy, że streak wynosi co najmniej 2 (bo wczoraj i przedwczoraj było OK).
@@ -179,8 +188,9 @@ def test_stats_streak_should_ignore_gaps_within_target_logic():
 
 @freeze_time("2026-05-03") # niedziela
 def test_stats_incomplete_week_between_complete_ones():
+    headers = authenticate()
     name = "test habit"
-    habit_id = client.post("/habits", json={"name": name, "target_per_week": 2}).json()["id"]
+    habit_id = client.post("/habits", json={"name": name, "target_per_week": 2}, headers=headers).json()["id"]
 
     today = date.today()
     current_week_start = today - timedelta(days=today.weekday())
@@ -203,15 +213,16 @@ def test_stats_incomplete_week_between_complete_ones():
 
     seed_checkins(habit_id, two_weeks_ago_checks + one_week_ago_checks + current_week_checks)
 
-    response = client.get(f"/habits/{habit_id}/stats")
+    response = client.get(f"/habits/{habit_id}/stats", headers=headers)
     stats = response.json()
 
     assert stats["streak"] == 2, f"expected 2 day streak, got {stats["streak"]}"
 
 @freeze_time("2026-05-03") # niedziela
 def test_stats_blank_week_between_complete_ones():
+    headers = authenticate()
     name = "test habit"
-    habit_id = client.post("/habits", json={"name": name, "target_per_week": 2}).json()["id"]
+    habit_id = client.post("/habits", json={"name": name, "target_per_week": 2}, headers=headers).json()["id"]
 
     today = date.today()
     current_week_start = today - timedelta(days=today.weekday())
@@ -230,18 +241,19 @@ def test_stats_blank_week_between_complete_ones():
 
     seed_checkins(habit_id, two_weeks_ago_checks + current_week_checks)
 
-    response = client.get(f"/habits/{habit_id}/stats")
+    response = client.get(f"/habits/{habit_id}/stats", headers=headers)
     stats = response.json()
 
     assert stats["streak"] == 2, f"expected 2 day streak, got {stats["streak"]}"
 
 
 def test_stats_not_increment_after_single_skip():
-    habit_id = client.post("/habits", json={"name": "test"}).json()["id"]
+    headers = authenticate()
+    habit_id = client.post("/habits", json={"name": "test"}, headers=headers).json()["id"]
 
-    client.post(f"/habits/{habit_id}/skip", json={"day": date.today().isoformat()})
+    client.post(f"/habits/{habit_id}/skip", json={"day": date.today().isoformat()}, headers=headers)
 
-    response = client.get(f"/habits/{habit_id}/stats")
+    response = client.get(f"/habits/{habit_id}/stats", headers=headers)
     assert response.status_code == 200
 
     stats_data = response.json()
@@ -251,8 +263,9 @@ def test_stats_not_increment_after_single_skip():
     assert result, f"expected no last days checked and 0 day streak, got {stats_data["checked_last_days"]} last days and {stats_data["streak"]} day streak"
 
 def test_stats_30_days_skip_between_checks():
+    headers = authenticate()
 
-    habit_id = client.post("/habits", json={"name": "test"}).json()["id"]
+    habit_id = client.post("/habits", json={"name": "test"}, headers=headers).json()["id"]
 
     past_days = [(date.today() - timedelta(days=i)) for i in range(30)]
     past_days.pop(9)
@@ -262,7 +275,7 @@ def test_stats_30_days_skip_between_checks():
     skip_day = date.today() - timedelta(days=9)
     seed_skips(habit_id, [skip_day])
 
-    response = client.get(f"/habits/{habit_id}/stats")
+    response = client.get(f"/habits/{habit_id}/stats", headers=headers)
 
     stats_data = response.json()
 

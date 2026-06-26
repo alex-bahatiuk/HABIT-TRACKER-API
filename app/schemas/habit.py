@@ -1,4 +1,5 @@
 from pydantic import ConfigDict,BaseModel, Field
+from app.models.user import User
 
 class HabitCreate(BaseModel):
    name: str = Field(min_length=1, max_length=120)
