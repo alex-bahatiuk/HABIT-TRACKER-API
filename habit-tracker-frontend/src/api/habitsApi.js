@@ -64,3 +64,19 @@ export const getHabitStrength = async (habitId) => {
 
   return response.data;
 };
+
+export const skipHabit = async (habitId, day) => {
+  const token = getToken();
+
+  const response = await axios.post(
+    `${API_URL}/habits/${habitId}/skip`,
+    { day },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};
