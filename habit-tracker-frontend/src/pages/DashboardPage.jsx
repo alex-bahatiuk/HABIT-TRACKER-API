@@ -1,6 +1,6 @@
 import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
-import { getHabits, createHabit } from "../api/habitsApi";
+import { getHabits, createHabit, completeHabit } from "../api/habitsApi";
 import HabitCard from "../components/HabitCard";
 
 function DashboardPage() {
@@ -32,6 +32,13 @@ useEffect(() => {
         const newHabit = await createHabit({ name });
         setHabits([...habits, newHabit]);
     };
+    const handleCompleteHabit = async (habitId) => {
+        const today = new Date().toISOString().slice(0, 10);
+
+        await completeHabit(habitId, today);
+
+        alert("Habit completed!");
+};
   if (isLoading) {
     return <p>Loading...</p>;
   }
@@ -52,7 +59,9 @@ useEffect(() => {
                 <p>No habits yet</p>
             ) : (
                 habits.map((habit) => (
-                    <HabitCard key={habit.id} habit={habit} onDelete={(habitId) => {
+                    <HabitCard key={habit.id} habit={habit}
+                     onComplete={handleCompleteHabit}
+                     onDelete={(habitId) => {
                 setHabits(habits.filter((habit) => habit.id !== habitId));
                     }}
                 />

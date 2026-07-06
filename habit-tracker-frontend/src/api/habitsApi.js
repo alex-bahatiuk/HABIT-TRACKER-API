@@ -37,3 +37,30 @@ export const deleteHabit = async (habitId) => {
     });
 };
   
+export const completeHabit = async (habitId, day) => {
+  const token = getToken();
+
+  const response = await axios.post(
+    `${API_URL}/habits/${habitId}/check`,
+    { day },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const getHabitStrength = async (habitId) => {
+  const token = getToken();
+
+  const response = await axios.get(`${API_URL}/habits/${habitId}/strength`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};

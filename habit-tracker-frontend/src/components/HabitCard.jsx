@@ -1,9 +1,13 @@
-import { deleteHabit } from "../api/habitsApi";
+import { useEffect, useState } from "react";
+import { deleteHabit, getHabitStrength } from "../api/habitsApi";
 
 function HabitCard({ habit, onComplete, onDelete }) {
     const handleDelete = async () => {
     await deleteHabit(habit.id);
     onDelete(habit.id);
+    <p>
+      Strength: {strength === null ? "Loading..." : strength}
+    </p>
 };
   return (
     <div>
