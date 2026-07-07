@@ -73,3 +73,12 @@ def skip_habit_endpoint(habit_id: int, payload: CheckCreate, db: Session = Depen
     #strength = habits_service.calculate_habit_strength(db, habit_id)
     #return HabitStrengthOut(habit_id=habit_id, strength=strength)
 
+@router.get("/{habit_id}/today-status")
+def today_status(
+    habit_id: int,
+    db: Session = Depends(db_session),
+    current_user: User = Depends(get_current_user),
+):
+    return habits_service.get_today_status(
+        db, habit_id, current_user.id
+    )

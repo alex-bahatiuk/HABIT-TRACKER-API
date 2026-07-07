@@ -204,3 +204,25 @@ def undo_skip_habit(db: Session, habit_id: int, day: date, owner_id: int) -> Non
     
     return round(0.0, 2)
 
+def get_today_status(db: Session, habit_id: int, owner_id: int):
+    get_habit(db, habit_id, owner_id)
+
+    today = date.today()
+
+    check = db.scalar(
+        select(HabitCheck).where(
+            HabitCheck.habit_id == habit_id,
+            HabitCheck.day == today,
+        )
+    )
+
+    if check is None:
+        return {"status": None}
+
+    if check.status == HabitStatus.DONE:
+        return {"status": "completed"}
+
+    if check.status == HabitStatus.SKIPPED:
+        return {"status": "skipped"}
+
+    return {"status": None}
