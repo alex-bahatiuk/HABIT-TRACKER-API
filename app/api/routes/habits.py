@@ -76,9 +76,10 @@ def skip_habit_endpoint(habit_id: int, payload: CheckCreate, db: Session = Depen
 @router.get("/{habit_id}/today-status")
 def today_status(
     habit_id: int,
+    day: date = Query(...),
     db: Session = Depends(db_session),
     current_user: User = Depends(get_current_user),
 ):
     return habits_service.get_today_status(
-        db, habit_id, current_user.id
+        db, habit_id, current_user.id, day
     )

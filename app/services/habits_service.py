@@ -204,15 +204,13 @@ def undo_skip_habit(db: Session, habit_id: int, day: date, owner_id: int) -> Non
     
     return round(0.0, 2)
 
-def get_today_status(db: Session, habit_id: int, owner_id: int):
+def get_today_status(db: Session, habit_id: int, owner_id: int, day: date):
     get_habit(db, habit_id, owner_id)
-
-    today = date.today()
 
     check = db.scalar(
         select(HabitCheck).where(
             HabitCheck.habit_id == habit_id,
-            HabitCheck.day == today,
+            HabitCheck.day == day,
         )
     )
 
