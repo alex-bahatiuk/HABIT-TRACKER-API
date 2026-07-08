@@ -80,3 +80,19 @@ export const skipHabit = async (habitId, day) => {
 
   return response.data;
 };
+
+export const getTodayStatus = async (habitId, day) => {
+  const token = getToken();
+
+  const response = await axios.get(
+    `${API_URL}/habits/${habitId}/today-status`,
+    {
+      params: { day },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};
