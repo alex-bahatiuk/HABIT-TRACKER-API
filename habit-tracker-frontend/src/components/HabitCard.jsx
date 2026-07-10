@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { deleteHabit, getHabitStrength, skipHabit, getTodayStatus } from "../api/habitsApi";
+import { deleteHabit, getHabitStrength, skipHabit, getTodayStatus, getHabitHistory } from "../api/habitsApi";
 
 function HabitCard({ habit, onComplete, onDelete }) {
     const [strength, setStrength] = useState(null);
     const [todayStatus, setTodayStatus] = useState(null);
+    const [history, setHistory] = useState(null);
 
     useEffect(() => {
         const fetchHabitStrength = async () => {
@@ -16,6 +17,15 @@ function HabitCard({ habit, onComplete, onDelete }) {
 
         fetchHabitStrength();
     }, [habit.id]);
+
+    const fetchHabitHistory = async () => {
+        if (history !== null) {
+            setHistory(null);
+            return;
+        }
+            const historyData = await getHabitHistory(habit.id);
+            setHistory(historyData);
+        };
 
     const handleDelete = async () => {
     await deleteHabit(habit.id);
@@ -38,8 +48,18 @@ function HabitCard({ habit, onComplete, onDelete }) {
                                     setTodayStatus("skipped");
               const habitStrength = await getHabitStrength(habit.id);
         setStrength(habitStrength.strength);}}>Skip</button>
+      <button onClick={fetchHabitHistory}>History</button>
+        
+        {history !== null && (
+            <div>
+            {history.map((item) => (
+                <p key={item.day}>
+                    {item.day}: {item.status}
+                </p>
+              ))}
+            </div>
+        )}
     </div>
-  );
-}
+  )}
 
 export default HabitCard;

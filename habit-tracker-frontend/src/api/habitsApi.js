@@ -96,3 +96,18 @@ export const getTodayStatus = async (habitId, day) => {
 
   return response.data;
 };
+
+export const getHabitHistory = async (habitId) => {
+  const token = getToken();
+
+  const response = await axios.get(
+    `${API_URL}/habits/${habitId}/history`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};
