@@ -1,5 +1,7 @@
 from pydantic import ConfigDict,BaseModel, Field
+from app.models.check import HabitStatus
 from app.models.user import User
+from datetime import date
 
 class HabitCreate(BaseModel):
    name: str = Field(min_length=1, max_length=120)
@@ -18,3 +20,8 @@ class HabitStrengthOut(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
     
+class HabitHistoryItem(BaseModel):
+    day: date
+    status: HabitStatus
+
+    model_config = ConfigDict(from_attributes=True)

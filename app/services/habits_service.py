@@ -224,3 +224,18 @@ def get_today_status(db: Session, habit_id: int, owner_id: int, day: date):
         return {"status": "skipped"}
 
     return {"status": None}
+
+def get_habit_history(
+    db: Session,
+    habit_id: int,
+    owner_id: int,
+) -> list[HabitCheck]:
+    get_habit(db, habit_id, owner_id)
+
+    history = db.scalars(
+        select(HabitCheck)
+        .where(HabitCheck.habit_id == habit_id)
+        .order_by(HabitCheck.day.desc())
+    ).all()
+
+    return list(history)

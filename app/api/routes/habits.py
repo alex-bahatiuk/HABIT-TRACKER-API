@@ -4,10 +4,10 @@ from datetime import date
 from fastapi import Query
 from app.api.deps import db_session
 from app.models.user import User
-from app.schemas.habit import HabitCreate, HabitOut, HabitStrengthOut
+from app.schemas.habit import HabitCreate, HabitOut, HabitStrengthOut, HabitHistoryItem
 from app.schemas.check import CheckCreate, CheckOut
 from app.services import habits_service
-from app.services.dependencies import get_current_user
+from app.services.dependencies import get_current_user 
 
 router = APIRouter(prefix="/habits", tags=["habits"])
 
@@ -83,3 +83,12 @@ def today_status(
     return habits_service.get_today_status(
         db, habit_id, current_user.id, day
     )
+
+@router.get("/{habit_id}/history" , response_model=list[HabitHistoryItem],)
+
+def habit_history(
+    habit_id: int,
+    db: Session = Depends(db_session),
+    current_user: User = Depends(get_current_user),
+):
+    return habits_service.get_habit_history(db, habit_id, current_user.id)
