@@ -48,16 +48,19 @@ function HabitCard({ habit, onComplete, onDelete }) {
                                     setTodayStatus("skipped");
               const habitStrength = await getHabitStrength(habit.id);
         setStrength(habitStrength.strength);}}>Skip</button>
-      <button onClick={fetchHabitHistory}>History</button>
+      <button onClick={fetchHabitHistory}>{history === null ? "Show History" : "Hide History"}</button>
         
-        {history !== null && (
-            <div>
+        {Array.isArray(history) && (
+          <div>
+            <h4>History</h4>
+
             {history.map((item) => (
                 <p key={item.day}>
-                    {item.day}: {item.status}
+                  📅 {item.day}{" "}
+                  {item.status === "done" ? "✅ Done" : "⏭️ Skipped"}
                 </p>
-              ))}
-            </div>
+           ))}
+          </div>
         )}
     </div>
   )}
