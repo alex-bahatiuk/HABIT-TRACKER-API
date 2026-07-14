@@ -24,12 +24,13 @@ useEffect(() => {
 
      const handleAddHabit = async () => {
         const name = prompt("Habit name:");
+        const targetPerWeek = prompt("Target per week:");
 
         if (!name) {
             return;
         }
 
-        const newHabit = await createHabit({ name });
+        const newHabit = await createHabit({ name, target_per_week:Number(targetPerWeek) });
         setHabits([...habits, newHabit]);
     };
     const handleCompleteHabit = async (habitId) => {

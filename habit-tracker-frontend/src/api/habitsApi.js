@@ -111,3 +111,33 @@ export const getHabitHistory = async (habitId) => {
 
   return response.data;
 };
+
+export const getHabit = async (habitId) => {
+  const token = getToken();
+
+  const response = await axios.get(
+    `${API_URL}/habits/${habitId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const getHabitStats = async (habitId) => {
+  const token = getToken();
+
+  const response = await axios.get(
+    `${API_URL}/habits/${habitId}/stats`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};

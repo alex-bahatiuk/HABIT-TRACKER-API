@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { deleteHabit, getHabitStrength, skipHabit, getTodayStatus, getHabitHistory } from "../api/habitsApi";
+import { Link } from "react-router-dom";
 
 function HabitCard({ habit, onComplete, onDelete }) {
     const [strength, setStrength] = useState(null);
@@ -33,7 +34,9 @@ function HabitCard({ habit, onComplete, onDelete }) {
 };
   return (
     <div>
-      <h3>{habit.name}</h3>
+      <Link to={`/habits/${habit.id}`}>
+         <h3>{habit.name}</h3>
+      </Link>
       
         Strength: {strength === null ? "Loading..." : strength}
         {todayStatus === "completed" && <p>Completed today</p>}

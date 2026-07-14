@@ -15,4 +15,6 @@ class CheckOut(BaseModel):
 class StatsResponse(BaseModel):
     streak: int
     checked_last_days: int
+    skipped_last_days: int
+    checked_this_week: int
    

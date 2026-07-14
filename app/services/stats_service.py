@@ -19,6 +19,13 @@ def get_stats(db: Session, habit_id: int, days: int = 30, owner_id: int | None =
     )
     skipped_days = {c.day for c in checks if c.status == HabitStatus.SKIPPED}
     checked_last_days = calculate_checked_last_days(checks)
+    week_start = today - timedelta(days=today.weekday())
+    checked_this_week = sum(
+        1
+        for check in checks
+        if check.status == HabitStatus.DONE
+        and check.day >= week_start
+)
 
     if habit.target_per_week is not None:
         print("Calculating weekly streak...")
@@ -36,6 +43,7 @@ def get_stats(db: Session, habit_id: int, days: int = 30, owner_id: int | None =
         "skipped_last_days": len(skipped_days),
         "range_start": start.isoformat(),
         "range_end": today.isoformat(),
+        "checked_this_week": checked_this_week,
     }
 
 def calculate_daily_streak(checks):
