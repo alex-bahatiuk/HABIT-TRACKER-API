@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-import app
 from app.core.database import Base, engine
 from app.api.routes.habits import router as habits_router
 from app.api.routes.stats import router as stats_router
