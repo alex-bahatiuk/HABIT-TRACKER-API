@@ -33,6 +33,10 @@ import com.example.habittracker.viewmodel.HabitViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habittracker.utils.TokenManager
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 @Composable
 fun HomeScreen() {
@@ -98,148 +102,170 @@ fun HomeScreen() {
 
         habits.forEach { habit ->
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = habit.id in completedHabits,
-            onCheckedChange = { checked ->
-                if (checked) {
-                    completedHabits.add(habit.id)
-                                     if (token != null) {
-                    val day = java.time.LocalDate.now().toString()
-            viewModel.checkHabit(
-                token = token,
-                habitId = habit.id,
-                day = day
-            )
-        }
-                } else {
-                    completedHabits.remove(habit.id)
-                    if (token != null) {
-                       val day = java.time.LocalDate.now().toString()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = habit.id in completedHabits,
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            completedHabits.add(habit.id)
+                            if (token != null) {
+                                val day = java.time.LocalDate.now().toString()
+                                viewModel.checkHabit(
+                                    token = token,
+                                    habitId = habit.id,
+                                    day = day
+                                )
+                            }
+                        } else {
+                            completedHabits.remove(habit.id)
+                            if (token != null) {
+                                val day = java.time.LocalDate.now().toString()
 
-             viewModel.uncheckHabit(
-                 token = token,
-                 habitId = habit.id,
-                 day = day
-             )
-        }
-                }
-            }
-        )
-
-        Text(
-            text = habit.name,
-            fontSize = 18.sp
-        )
-    }
-}
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                showAddDialog = true
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(R.string.home_add_habit)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = stringResource(R.string.home_today_progress),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-             text = "${completedHabits.size} / ${habits.size}",
-             fontSize = 24.sp
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-
-        HorizontalDivider()
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            Text(stringResource(R.string.home_tab_home))
-            Text(stringResource(R.string.home_tab_stats))
-            Text("+")
-            Text(stringResource(R.string.home_tab_profile))
-        }
-        if (showAddDialog) {
-
-    var habitName by remember {
-        mutableStateOf("")
-    }
-
-    AlertDialog(
-        onDismissRequest = {
-            showAddDialog = false
-        },
-
-        title = {
-            Text("Add habit")
-        },
-
-        text = {
-            OutlinedTextField(
-                value = habitName,
-                onValueChange = {
-                    habitName = it
-                },
-                label = {
-                    Text("Habit name")
-                },
-                singleLine = true
-            )
-        },
-
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val name = habitName.trim()
-
-                    if (name.isNotEmpty()) {
-                        val token = TokenManager.getToken(context)
-                        if (token != null) {
-                            viewModel.createHabit(token = token, name = name)
+                                viewModel.uncheckHabit(
+                                    token = token,
+                                    habitId = habit.id,
+                                    day = day
+                                )
+                            }
                         }
-                        showAddDialog = false
                     }
-                }
-            ) {
-                Text("Add")
-            }
-        },
+                )
 
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    showAddDialog = false
+                Text(
+                    text = habit.name,
+                    fontSize = 18.sp,
+                    modifier = Modifier.weight(1f)
+                )
+
+                IconButton(
+                    onClick = {
+                        if (token != null) {
+                            viewModel.deleteHabit(
+                                token = token,
+                                habitId = habit.id
+                            )
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete habit"
+                    )
                 }
-            ) {
-                Text("Cancel")
             }
         }
-    )
-}
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    showAddDialog = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.home_add_habit)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = stringResource(R.string.home_today_progress),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "${completedHabits.size} / ${habits.size}",
+                fontSize = 24.sp
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+
+            HorizontalDivider()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                Text(stringResource(R.string.home_tab_home))
+                Text(stringResource(R.string.home_tab_stats))
+                Text("+")
+                Text(stringResource(R.string.home_tab_profile))
+            }
+            if (showAddDialog) {
+
+                var habitName by remember {
+                    mutableStateOf("")
+                }
+
+                AlertDialog(
+                    onDismissRequest = {
+                        showAddDialog = false
+                    },
+
+                    title = {
+                        Text("Add habit")
+                    },
+
+                    text = {
+                        OutlinedTextField(
+                            value = habitName,
+                            onValueChange = {
+                                habitName = it
+                            },
+                            label = {
+                                Text("Habit name")
+                            },
+                            singleLine = true
+                        )
+                    },
+
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                val name = habitName.trim()
+
+                                if (name.isNotEmpty()) {
+                                    val token = TokenManager.getToken(context)
+                                    if (token != null) {
+                                        viewModel.createHabit(token = token, name = name)
+                                    }
+                                    showAddDialog = false
+                                }
+                            }
+                        ) {
+                            Text("Add")
+                        }
+                    },
+
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showAddDialog = false
+                            }
+                        ) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
+        }
     }
-}
+
+
+
+
+
 
 
 

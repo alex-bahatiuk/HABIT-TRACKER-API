@@ -138,4 +138,22 @@ class HabitViewModel : ViewModel() {
         }
         }
     }
+    fun deleteHabit(
+    token: String,
+    habitId: Int
+) {
+    viewModelScope.launch {
+        try {
+            repository.deleteHabit(
+                token = token,
+                habitId = habitId
+            )
+
+            loadHabits(token)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}
 }
