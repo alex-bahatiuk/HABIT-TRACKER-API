@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HabitTracker</string>
+    <string name="welcome_title">Добро пожаловать!</string>
+    <string name="welcome_subtitle">Школа привычек</string>
+    <string name="welcome_main_title">Твой персональный наставник по привычкам</string>
+    <string name="next">Дальше</string>
+    <string name="welcome_description">Научись формировать привычки на основе проверенных методик</string>
+    <string name="welcome_feature_science">Привычки по научным методикам</string>
+    <string name="welcome_feature_lessons">Короткие уроки на 2–3 минуты в день</string>
+    <string name="welcome_feature_progress">Прогресс и серии без давления</string>
+    <string name="setup_title">Создай свою систему привычек</string>
+    <string name="setup_subtitle">Выбери, что ты хочешь улучшить</string>
+    <string name="setup_main_text">Начни с небольших и реальных шагов</string>
+    <string name="setup_description">Выбери привычки, которые подходят твоей жизни, и определи, как часто ты хочешь их выполнять</string>
+    <string name="habit_selection_title">Выбери свои привычки</string>
+    <string name="habit_selection_description">Выбери готовые привычки или создай собственную</string>
+    <string name="create_custom_habit">Создать свою привычку</string>
+    <string name="habit_name">Название привычки</string>
+    <string name="add">Добавить</string>
+    <string name="cancel">Отмена</string>
+    <string name="habit_drink_water">Пить воду</string>
+    <string name="habit_take_walk">Гулять</string>
+    <string name="habit_exercise">Заниматься спортом</string>
+    <string name="habit_sleep_on_time">Ложиться спать вовремя</string>
+    <string name="habit_eat_vegetables">Есть овощи</string>
+    <string name="goal_health">Здоровье</string>
+    <string name="goal_energy">Энергия</string>
+    <string name="goal_productivity">Продуктивность</string>
+    <string name="goal_mood">Настроение</string>
+    <string name="goal_confidence">Уверенность</string>
+    <string name="goal_discipline">Дисциплина</string>
+    <string name="energy">Энергия</string>
+    <string name="productivity">Продуктивность</string>
+    <string name="learning">Обучение</string>
+    <string name="mindfulness">Осознанность</string>
+    <string name="relationships">Отношения</string>
+    <string name="health">Здоровье</string>
+    <string name="home_greeting">Доброе утро 👋</string>
+    <string name="home_today">Сегодня</string>
+    <string name="home_add_habit">+ Добавить привычку</string>
+    <string name="home_today_progress">Прогресс за сегодня</string>
+    <string name="home_tab_home">Главная</string>
+    <string name="home_tab_stats">Статистика</string>
+    <string name="home_tab_profile">Профиль</string>
+</resources>

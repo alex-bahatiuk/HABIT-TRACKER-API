@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">HabitTracker</string>
+    <string name="welcome_title">Welcome!</string>
+    <string name="welcome_subtitle">Habit School</string>
+
+    <string name="welcome_main_title">Your personal habit coach</string>
+
+    <string name="welcome_feature_science">Habits based on proven methods</string>
+
+    <string name="welcome_feature_lessons">Short 2–3 minute lessons each day</string>
+
+    <string name="welcome_feature_progress">Progress and steaks without pressure</string>
+
+    <string name="next">Next</string>
+    <string name="welcome_description">Learn to build habits using proven methods</string>
+    <string name="setup_title">Build your habit system</string>
+    <string name="setup_subtitle">Choose what you want to improve</string>
+    <string name="setup_main_text">Start with small and realistic steps</string>
+    <string name="setup_description">Select habits that fit your life and decide how often you want to complete them.</string>
+    <string name="habit_selection_title">Choose your habits</string>
+    <string name="habit_selection_description">Select recommended habits or create your own</string>
+    <string name="create_custom_habit">Create your own habit</string>
+    <string name="habit_name">Habit name</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="habit_drink_water">Drink water</string>
+    <string name="habit_take_walk">Take a walk</string>
+    <string name="habit_exercise">Exercise</string>
+    <string name="habit_sleep_on_time">Go to bed on time</string>
+    <string name="habit_eat_vegetables">Eat vegetables</string>
+
+    <string name="goal_health">Health</string>
+    <string name="goal_energy">Energy</string>
+    <string name="goal_productivity">Productivity</string>
+    <string name="goal_mood">Mood</string>
+    <string name="goal_confidence">Confidence</string>
+    <string name="goal_discipline">Discipline</string>
+    <string name="energy">Energy</string>
+    <string name="productivity">Productivity</string>
+    <string name="learning">Learning</string>
+    <string name="mindfulness">Mindfulness</string>
+    <string name="relationships">Relationships</string>
+    <string name="health">Health</string>
+
+    <string name="home_greeting">Good morning 👋</string>
+    <string name="home_today">Today</string>
+    <string name="home_add_habit">+ Add habit</string>
+    <string name="home_today_progress">Today\'s progress/</string>
+    <string name="home_tab_home">Home</string>
+    <string name="home_tab_stats">Stats</string>
+    <string name="home_tab_profile">Profile</string>
+
+</resources>

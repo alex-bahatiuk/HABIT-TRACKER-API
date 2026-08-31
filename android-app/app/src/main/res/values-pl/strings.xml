@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HabitTracker</string>
+    <string name="welcome_title">Witamy!</string>
+    <string name="welcome_subtitle">Szkola nawyków</string>
+    <string name="welcome_main_title">Twój osobisty trener nawyków</string>
+    <string name="next">Dalej</string>
+    <string name="welcome_description">Naucz się budować nawyki w oparciu o sprawdzone metody</string>
+    <string name="welcome_feature_science">Nawyki oparte na sprawdzonych metodach</string>
+    <string name="welcome_feature_lessons">Krótkie lekcje trwające 2–3 minuty dziennie</string>
+    <string name="welcome_feature_progress">Postępy i serie bez presji</string>
+    <string name="setup_title">Stwórz swój system nawyków</string>
+    <string name="setup_subtitle">Wybierz, co chcesz poprawić</string>
+    <string name="setup_main_text">Zacznij od małych i realnych kroków</string>
+    <string name="setup_description">Wybierz nawyki, które pasują do twojego życia, i określ, jak często chcesz je wykonywać</string>
+    <string name="habit_selection_title">Wybierz swoje nawyki</string>
+    <string name="habit_selection_description">Wybierz proponowane nawyki lub utwórz własny</string>
+    <string name="create_custom_habit">Utwórz własny nawyk</string>
+    <string name="habit_name">Nazwa nawyku</string>
+    <string name="add">Dodaj</string>
+    <string name="cancel">Anuluj</string>
+    <string name="habit_drink_water">Pić wodę</string>
+    <string name="habit_take_walk">Spacerować</string>
+    <string name="habit_exercise">Ćwiczyć</string>
+    <string name="habit_sleep_on_time">Kłaść się spać na czas</string>
+    <string name="habit_eat_vegetables">Jeść warzywa</string>
+    <string name="goal_health">Zdrowie</string>
+    <string name="goal_energy">Energia</string>
+    <string name="goal_productivity">Produktywność</string>
+    <string name="goal_mood">Samopoczucie</string>
+    <string name="goal_confidence">Pewność siebie</string>
+    <string name="goal_discipline">Dyscyplina</string>
+    <string name="energy">Energia</string>
+    <string name="productivity">Produktywność</string>
+    <string name="learning">Nauka</string>
+    <string name="mindfulness">Uważność</string>
+    <string name="relationships">Relacje</string>
+    <string name="health">Zdrowie</string>
+    <string name="home_greeting">Dzień dobry 👋</string>
+    <string name="home_today">Dzisiaj</string>
+    <string name="home_add_habit">+ Dodaj nawyk</string>
+    <string name="home_today_progress">Dzisiejszy postęp</string>
+    <string name="home_tab_home">Główna</string>
+    <string name="home_tab_stats">Statystyki</string>
+    <string name="home_tab_profile">Profil</string>
+</resources>
