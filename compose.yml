@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://habit_user:habit_password@db:5432/habit_tracker
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       - db
 
@@ -22,9 +22,9 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: habit_tracker
-      POSTGRES_USER: habit_user
-      POSTGRES_PASSWORD: habit_password
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
