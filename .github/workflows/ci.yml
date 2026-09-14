@@ -23,3 +23,15 @@ jobs:
 
       - name: Run tests
         run: python -m pytest
+
+  deploy:
+    needs: test
+    runs-on: self-hosted
+
+    steps:
+      - name: Deploy to EC2
+        run: |
+          cd /home/ubuntu/HABIT-TRACKER-API
+          git pull --ff-only origin main
+          docker compose up -d --build
+          docker compose ps      
