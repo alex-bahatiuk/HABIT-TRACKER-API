@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.habittracker.model.HabitStats
 
 
 class HabitViewModel : ViewModel() {
@@ -19,6 +20,9 @@ class HabitViewModel : ViewModel() {
     private val repository = HabitRepository()
 
     var habits by mutableStateOf<List<Habit>>(emptyList())
+        private set
+
+    var habitStats by mutableStateOf<Map<Int, HabitStats>>(emptyMap())
         private set
 
     fun register(
@@ -102,7 +106,7 @@ class HabitViewModel : ViewModel() {
     token: String,
     habitId: Int,
     day: String
-) {
+    ) {
     viewModelScope.launch {
         try {
             repository.uncheckHabit(
@@ -141,7 +145,7 @@ class HabitViewModel : ViewModel() {
     fun deleteHabit(
     token: String,
     habitId: Int
-) {
+    ) {
     viewModelScope.launch {
         try {
             repository.deleteHabit(
@@ -155,5 +159,23 @@ class HabitViewModel : ViewModel() {
             e.printStackTrace()
         }
     }
-}
-}
+    }
+
+    fun loadHabitStats(
+    token: String,
+    habitId: Int
+    ) {
+    viewModelScope.launch {
+        try {
+            val stats = repository.getHabitStats(
+                token = token,
+                habitId = habitId
+            )
+
+            habitStats = habitStats + (habitId to stats)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}}

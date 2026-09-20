@@ -3,11 +3,13 @@ package com.example.habittracker.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,100 +37,112 @@ import androidx.compose.material3.OutlinedButton
 @Composable
 fun SetupScreen(
     onNextClick: () -> Unit
-){
-var selectedGoal by remember {
+) {
+    var selectedGoal by remember {
         mutableStateOf<GoalCategory?>(null)
     }
-val goals = listOf(
-    GoalCategory.HEALTH,
-    GoalCategory.ENERGY,
-    GoalCategory.PRODUCTIVITY,
-    GoalCategory.MOOD,
-    GoalCategory.CONFIDENCE,
-    GoalCategory.DISCIPLINE
-)
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp, vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    val goals = listOf(
+        GoalCategory.HEALTH,
+        GoalCategory.ENERGY,
+        GoalCategory.PRODUCTIVITY,
+        GoalCategory.MOOD,
+        GoalCategory.CONFIDENCE,
+        GoalCategory.DISCIPLINE
+    )
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Text(
-            text = stringResource(R.string.setup_title),
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+        val compact = maxHeight < 750.dp
 
-        Spacer(modifier = Modifier.height(16.dp))
+        val verticalPadding = if (compact) 12.dp else 40.dp
+        val spaceSmall = if (compact) 8.dp else 16.dp
+        val spaceMedium = if (compact) 16.dp else 40.dp
+        val iconSize = if (compact) 80.dp else 100.dp
 
-        Text(
-            text = stringResource(R.string.setup_subtitle),
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center,
-            color = Color.Gray
-        )
-
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        Box(
+        Column(
             modifier = Modifier
-                .size(104.dp)
-                .background(
-                    color = Color(0xFFD8F7E3),
-                    shape = RoundedCornerShape(24.dp)
+                .fillMaxSize()
+                .padding(
+                    horizontal = 32.dp,
+                    vertical = verticalPadding
                 ),
-            contentAlignment = Alignment.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                painter = painterResource(R.drawable.outline_checklist_24),
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = Color(0xFF78B82A)
-            )
-        }
-
-        goals.forEach { goal ->
-
-            GoalButton(
-                  text = stringResource(goal.titleRes),
-                  selected = selectedGoal == goal,
-                  onClick = {
-                       selectedGoal = goal
-        }
-    )
-
-            Spacer(modifier = Modifier.height(10.dp))
-}
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = stringResource(R.string.setup_main_text),
-            fontSize = 19.sp,
-            textAlign = TextAlign.Center,
-            color = Color.Gray
-        )
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        Button(
-              onClick = {
-                 if (selectedGoal != null) {onNextClick()}
-    },
-              enabled = selectedGoal != null,
-              modifier = Modifier.fillMaxWidth()
-) {
             Text(
-                text = stringResource(R.string.next),
-                fontSize = 18.sp
-    )
-}
+                text = stringResource(R.string.setup_title),
+                fontSize = if (compact)26.sp else 32.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = stringResource(R.string.setup_subtitle),
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                color = Color.Gray
+            )
+
+
+            Spacer(modifier = Modifier.height(spaceMedium))
+
+            Box(
+                modifier = Modifier
+                    .size(iconSize)
+                    .background(
+                        color = Color(0xFFD8F7E3),
+                        shape = RoundedCornerShape(24.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.outline_checklist_24),
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = Color(0xFF78B82A)
+                )
+            }
+
+            goals.forEach { goal ->
+
+                GoalButton(
+                    text = stringResource(goal.titleRes),
+                    selected = selectedGoal == goal,
+                    onClick = {
+                        selectedGoal = goal
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = stringResource(R.string.setup_main_text),
+                fontSize = 19.sp,
+                textAlign = TextAlign.Center,
+                color = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.height(spaceMedium))
+
+            Button(
+                onClick = {
+                    if (selectedGoal != null) {
+                        onNextClick()
+                    }
+                },
+                enabled = selectedGoal != null,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.next),
+                    fontSize = 18.sp
+                )
+            }
+        }
     }
 }
-
 @Composable
 private fun GoalButton(
     text: String,

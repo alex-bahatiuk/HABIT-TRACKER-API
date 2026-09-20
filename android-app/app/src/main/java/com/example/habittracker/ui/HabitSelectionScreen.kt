@@ -60,7 +60,10 @@ fun HabitSelectionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 32.dp)
+            .padding(start = 24.dp,
+                     end = 24.dp,
+                     top = 20.dp,
+                     bottom = 48.dp)
     ) {
         Text(
             text = stringResource(R.string.habit_selection_title),

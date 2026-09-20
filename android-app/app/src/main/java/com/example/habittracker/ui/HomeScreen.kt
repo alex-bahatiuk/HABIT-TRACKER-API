@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -66,6 +67,10 @@ fun HomeScreen() {
                     completedHabits.add(habit.id)
                 }
             }
+            viewModel.loadHabitStats(
+                token = token,
+                habitId = habit.id
+            )
         }
     }
 }
@@ -103,7 +108,7 @@ fun HomeScreen() {
         habits.forEach { habit ->
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(

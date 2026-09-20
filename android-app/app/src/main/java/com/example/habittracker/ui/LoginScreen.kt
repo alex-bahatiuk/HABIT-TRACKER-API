@@ -1,5 +1,6 @@
 package com.example.habittracker.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import com.example.habittracker.api.ApiClient
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import com.example.habittracker.utils.TokenManager
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun LoginScreen(onRegisterClick: () ->
@@ -38,6 +40,9 @@ Unit, onLoginSuccess: () -> Unit) {
         mutableStateOf("")
     }
 
+    var loginError by remember {
+    mutableStateOf<String?>(null)
+    }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -80,7 +85,12 @@ Unit, onLoginSuccess: () -> Unit) {
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-
+        loginError?.let { error ->
+            Text(
+                  text = error,
+                   color = Color.Red
+        )
+      }
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
@@ -99,11 +109,13 @@ Unit, onLoginSuccess: () -> Unit) {
 
                          println("TOKEN SAVED")
                          onLoginSuccess()
-                     } catch (e: Exception) {println("LOGIN ERROR: ${e.message}")
+                     } catch (e: Exception) {
+                         loginError = "Incorrect email or password"
+                         Log.e("LOGIN", "LOGIN ERROR: ${e.message}")
                      }
                 }
+                      },
 
-            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Login")

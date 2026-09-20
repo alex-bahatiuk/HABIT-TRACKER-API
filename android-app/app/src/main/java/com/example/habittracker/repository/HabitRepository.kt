@@ -7,6 +7,7 @@ import com.example.habittracker.model.Token
 import com.example.habittracker.model.User
 import com.example.habittracker.model.UserCreate
 import com.example.habittracker.model.HabitCheckRequest
+import com.example.habittracker.model.HabitStats
 import com.example.habittracker.model.HabitStatusResponse
 
 class HabitRepository {
@@ -80,4 +81,14 @@ class HabitRepository {
         day = day
     )
     }
+
+    suspend fun getHabitStats(
+        token: String,
+        habitId: Int
+    ): HabitStats {
+        return api.getHabitStats(
+            token = "Bearer $token",
+            habitId = habitId
+    )
+}
 }

@@ -21,10 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.habittracker.viewmodel.RegisterViewModel
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun RegisterScreen(
-    onBackToLogin: () -> Unit
+    onBackToLogin: () -> Unit, viewModel: RegisterViewModel
 ) {
     var email by remember {
         mutableStateOf("")
@@ -34,6 +36,12 @@ fun RegisterScreen(
         mutableStateOf("")
     }
 
+    LaunchedEffect(viewModel.registrationSuccess) {
+        if (viewModel.registrationSuccess) {
+             onBackToLogin()
+        }
+}
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -42,6 +50,9 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Create account")
+        if (viewModel.registrationError) {
+            Text(text = "Registration failed")
+}
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -78,7 +89,7 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                // Позже вызовем ViewModel
+                viewModel.register(email, password)
             },
             modifier = Modifier.fillMaxWidth()
         ) {

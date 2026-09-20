@@ -14,6 +14,7 @@ import retrofit2.http.Path
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import com.example.habittracker.model.HabitCheckRequest
+import com.example.habittracker.model.HabitStats
 import com.example.habittracker.model.HabitStatusResponse
 import retrofit2.http.Query
 
@@ -73,4 +74,10 @@ suspend fun uncheckHabit(
         @Header("Authorization") token: String,
         @Path("habitId") habitId: Int
     )
+
+    @GET("habits/{habitId}/stats")
+suspend fun getHabitStats(
+    @Header("Authorization") token: String,
+    @Path("habitId") habitId: Int
+): HabitStats
 }
