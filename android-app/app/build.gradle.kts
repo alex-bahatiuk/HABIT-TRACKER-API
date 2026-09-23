@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.habittracker"
+    namespace = "com.habittracker.app"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.habittracker"
+        applicationId = "com.habittracker.app"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -62,4 +62,6 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+    implementation("androidx.credentials:credentials:1.5.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }

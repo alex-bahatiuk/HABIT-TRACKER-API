@@ -1,0 +1,94 @@
+package com.habittracker.app.repository
+
+import com.habittracker.app.api.ApiClient
+import com.habittracker.app.model.Habit
+import com.habittracker.app.model.HabitCreate
+import com.habittracker.app.model.Token
+import com.habittracker.app.model.User
+import com.habittracker.app.model.UserCreate
+import com.habittracker.app.model.HabitCheckRequest
+import com.habittracker.app.model.HabitStats
+import com.habittracker.app.model.HabitStatusResponse
+
+class HabitRepository {
+
+    private val api = ApiClient.retrofit.create(
+        com.habittracker.app.api.HabitApi::class.java
+    )
+
+    suspend fun register(user: UserCreate): User {
+        return api.register(user)
+    }
+
+    suspend fun login(email: String, password: String): Token {
+        return api.login(email, password)
+    }
+
+    suspend fun getCurrentUser(token: String): User {
+        return api.getCurrentUser("Bearer $token")
+    }
+
+    suspend fun getHabits(token: String): List<Habit> {
+        return api.getHabits("Bearer $token")
+    }
+
+    suspend fun createHabit(
+        token: String,
+        habit: HabitCreate
+    ): Habit {
+        return api.createHabit("Bearer $token", habit)
+    }
+
+    suspend fun deleteHabit(
+        token: String,
+        habitId: Int
+    ) {
+        api.deleteHabit("Bearer $token", habitId)
+    }
+
+    suspend fun checkHabit(
+        token: String,
+        habitId: Int,
+        day: String
+    ) {
+        api.checkHabit(
+            token = "Bearer $token",
+            habitId = habitId,
+            request = HabitCheckRequest
+                (day = day)
+        )
+    }
+
+    suspend fun uncheckHabit(
+    token: String,
+    habitId: Int,
+    day: String
+    ) {
+    api.uncheckHabit(
+        token = "Bearer $token",
+        habitId = habitId,
+        day = day
+    )
+    }
+    suspend fun getTodayStatus(
+    token: String,
+    habitId: Int,
+    day: String
+    ): HabitStatusResponse {
+        return api.getTodayStatus(
+        token = "Bearer $token",
+        habitId = habitId,
+        day = day
+    )
+    }
+
+    suspend fun getHabitStats(
+        token: String,
+        habitId: Int
+    ): HabitStats {
+        return api.getHabitStats(
+            token = "Bearer $token",
+            habitId = habitId
+    )
+}
+}
