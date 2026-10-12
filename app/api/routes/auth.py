@@ -8,9 +8,14 @@ from app.schemas.token import Token
 from app.services.auth_service import hash_password, verify_password, create_access_token
 from app.services.dependencies import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from pydantic import BaseModel
+
+class GoogleLoginRequest(BaseModel):
+    id_token: str
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
@@ -52,6 +57,46 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         "token_type": "bearer",
     }
 
+@router.post("/google", response_model=Token)
+def google_login(data: GoogleLoginRequest, db: Session = Depends(get_db)):
+    try:
+        google_user = id_token.verify_oauth2_token(
+            data.id_token,
+            requests.Request()
+        )
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Google token"
+        )
+
+    email = google_user.get("email")
+
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google account has no email"
+        )
+        user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        user = User(
+            email=email,
+            hashed_password=hash_password("GOOGLE_ACCOUNT")
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    access_token = create_access_token(
+        data={"sub": str(user.id)}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
+    
 @router.get("/me", response_model=UserOut)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user

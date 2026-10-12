@@ -34,6 +34,7 @@ import androidx.credentials.CustomCredential
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.habittracker.app.R
+import com.habittracker.app.model.GoogleLoginRequest
 
 @Composable
 fun LoginScreen(onRegisterClick: () ->
@@ -160,6 +161,14 @@ Unit, onLoginSuccess: () -> Unit) {
                          val idToken = googleCredential.idToken
 
                          Log.d("GOOGLE_LOGIN", "Google token received")
+
+                         val response = ApiClient.authApi.googleLogin(
+                             GoogleLoginRequest(id_token = idToken)
+                         )
+
+                         TokenManager.saveToken(context, response.access_token)
+
+                         onLoginSuccess()
                      }
 
                  } catch (e: Exception) {

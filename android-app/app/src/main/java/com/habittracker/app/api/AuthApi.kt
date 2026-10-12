@@ -1,5 +1,6 @@
 package com.habittracker.app.api
 
+import com.habittracker.app.model.GoogleLoginRequest
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -21,4 +22,9 @@ interface AuthApi {
     suspend fun register(
         @Body request: RegisterRequest
     ): UserResponse
+
+    @POST("auth/google")
+    suspend fun googleLogin(
+        @Body request: GoogleLoginRequest
+    ): TokenResponse
 }
