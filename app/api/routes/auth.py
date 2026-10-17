@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -60,9 +61,12 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @router.post("/google", response_model=Token)
 def google_login(data: GoogleLoginRequest, db: Session = Depends(get_db)):
     try:
+        google_client_id = os.environ["GOOGLE_CLIENT_ID"]
+
         google_user = id_token.verify_oauth2_token(
             data.id_token,
-            requests.Request()
+            requests.Request(),
+            google_client_id
         )
     except ValueError:
         raise HTTPException(
